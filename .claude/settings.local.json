@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-code-templates@latest --skill creative-design/frontend-design)",
+      "Bash(npm --version)",
+      "Bash(npx claude-code-templates@latest --skill development/supabase-postgres-best-practices --yes)",
+      "WebFetch(domain:www.aitmpl.com)",
+      "WebFetch(domain:aitmpl.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:mcpmarket.com)",
+      "Bash(npx claude-code-templates@latest --list-agents)",
+      "Bash(git --version)",
+      "Bash(claude --version)",
+      "Bash(npm search *)",
+      "Bash(npx skillhub *)",
+      "Bash(npx skills *)",
+      "Bash(npx claude-code-templates@latest --agent payments/payment-integration --yes)",
+      "Bash(npx claude-code-templates@latest --agent payments/stripe-integration --yes)",
+      "Bash(npx claude-code-templates@latest --health-check)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --no-turbopack --yes)",
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
