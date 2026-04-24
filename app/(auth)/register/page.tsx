@@ -1,9 +1,34 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError("")
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("Preencha todos os campos.")
+      return
+    }
+
+    setLoading(true)
+    await new Promise((r) => setTimeout(r, 600))
+    router.push("/onboarding")
+  }
+
   return (
     <>
       <div className="mb-6 text-center">
@@ -16,15 +41,30 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
           <Label htmlFor="name">Nome completo</Label>
-          <Input id="name" placeholder="Seu nome" autoComplete="name" />
+          <Input
+            id="name"
+            placeholder="Seu nome"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={loading}
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" placeholder="seu@email.com" autoComplete="email" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -34,11 +74,18 @@ export default function RegisterPage() {
             type="password"
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
         </div>
 
-        <Button type="submit" className="w-full h-10">
-          Criar conta
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+
+        <Button type="submit" className="w-full h-10" disabled={loading}>
+          {loading ? "Criando conta..." : "Criar conta"}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground leading-5">

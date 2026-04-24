@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +18,7 @@ function slugify(str: string): string {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter()
   const [step, setStep] = useState<1 | 2>(1)
   const [workspaceName, setWorkspaceName] = useState("")
   const slug = slugify(workspaceName)
@@ -107,7 +109,7 @@ export default function OnboardingPage() {
             </p>
           </div>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); router.push("/dashboard") }}>
             <div className="space-y-1.5">
               <Label htmlFor="invite-email">E-mail do membro</Label>
               <div className="flex gap-2">
@@ -128,7 +130,12 @@ export default function OnboardingPage() {
               <ArrowRight className="ml-2 size-4" />
             </Button>
 
-            <Button type="button" variant="ghost" className="w-full h-10 text-muted-foreground">
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full h-10 text-muted-foreground"
+              onClick={() => router.push("/dashboard")}
+            >
               Pular por enquanto
             </Button>
           </form>

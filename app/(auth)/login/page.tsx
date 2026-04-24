@@ -1,9 +1,34 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError("")
+
+    if (!email.trim() || !password.trim()) {
+      setError("Preencha e-mail e senha.")
+      return
+    }
+
+    setLoading(true)
+    // Simula latência de rede até o backend ser conectado (M6)
+    await new Promise((r) => setTimeout(r, 600))
+    router.push("/dashboard")
+  }
+
   return (
     <>
       <div className="mb-6 text-center">
@@ -16,10 +41,18 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" placeholder="seu@email.com" autoComplete="email" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -32,13 +65,29 @@ export default function LoginPage() {
               Esqueci minha senha
             </Link>
           </div>
-          <Input id="password" type="password" placeholder="••••••••" autoComplete="current-password" />
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+          />
         </div>
 
-        <Button type="submit" className="w-full h-10">
-          Entrar
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+
+        <Button type="submit" className="w-full h-10" disabled={loading}>
+          {loading ? "Entrando..." : "Entrar"}
         </Button>
       </form>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        Modo demo — qualquer e-mail e senha funcionam.
+      </p>
     </>
   )
 }
