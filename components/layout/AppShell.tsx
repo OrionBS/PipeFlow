@@ -26,9 +26,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Mobile sidebar (slide-in drawer) ── */}
       <aside
+        aria-hidden={!sidebarOpen}
+        inert={!sidebarOpen}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 flex-col transition-transform duration-300 ease-in-out lg:hidden",
-          sidebarOpen ? "flex translate-x-0" : "flex -translate-x-full"
+          "fixed inset-y-0 left-0 z-50 w-64 flex flex-col transition-transform duration-300 ease-in-out lg:hidden",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <Sidebar onNavigate={() => setSidebarOpen(false)} />

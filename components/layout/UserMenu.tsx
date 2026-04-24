@@ -3,7 +3,7 @@
 import { Menu } from "@base-ui/react/menu"
 import { LogOut, Settings, User } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { MOCK_USER, MOCK_CURRENT_WORKSPACE } from "@/lib/mock-data"
+import { MOCK_USER } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 
 export function UserMenu() {
