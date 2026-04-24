@@ -32,16 +32,16 @@
 
 ### Entregas
 
-- [ ] Criar projeto Next.js 14 com App Router e TypeScript strict (`npx create-next-app@latest`)
-- [ ] Configurar Tailwind CSS v3
-- [ ] Instalar e inicializar shadcn/ui (`npx shadcn-ui@latest init`) com tema slate
-- [ ] Configurar fonte Inter via `next/font`
-- [ ] Criar estrutura de pastas conforme `CLAUDE.md`: `app/`, `components/`, `lib/`, `types/`, `docs/`
-- [ ] Criar `lib/utils.ts` com `cn()` e `formatCurrency()`
-- [ ] Criar `types/index.ts` com interfaces: `Workspace`, `Lead`, `Deal`, `Activity`, `Member`, `Plan`
-- [ ] Criar `.env.local` com todas as variáveis (valores vazios)
-- [ ] Criar `.env.example` com as mesmas variáveis (para o repo)
-- [ ] Configurar `.gitignore` (incluir `.env.local`)
+- [x] Criar projeto Next.js 14 com App Router e TypeScript strict (`npx create-next-app@latest`)
+- [x] Configurar Tailwind CSS v3
+- [x] Instalar e inicializar shadcn/ui (`npx shadcn-ui@latest init`) com tema slate
+- [x] Configurar fonte Inter via `next/font`
+- [x] Criar estrutura de pastas conforme `CLAUDE.md`: `app/`, `components/`, `lib/`, `types/`, `docs/`
+- [x] Criar `lib/utils.ts` com `cn()` e `formatCurrency()`
+- [x] Criar `types/index.ts` com interfaces: `Workspace`, `Lead`, `Deal`, `Activity`, `Member`, `Plan`
+- [x] Criar `.env.local` com todas as variáveis (valores vazios)
+- [x] Criar `.env.example` com as mesmas variáveis (para o repo)
+- [x] Configurar `.gitignore` (incluir `.env.local`)
 - [ ] Inicializar repositório Git e subir para GitHub
 - [ ] Linkar projeto ao Vercel e fazer primeiro deploy
 
