@@ -109,17 +109,17 @@
 ### Entregas
 
 **Listagem**
-- [ ] `app/(app)/leads/page.tsx` — página principal de leads
-- [ ] `components/leads/LeadTable.tsx` — tabela com colunas: nome, empresa, e-mail, status, responsável, data
-- [ ] `components/leads/LeadFilters.tsx` — filtros por status, responsável, data (Select + DatePicker)
-- [ ] `components/leads/LeadSearch.tsx` — busca em tempo real por nome/empresa/e-mail
-- [ ] Paginação (UI)
-- [ ] Botão "Novo Lead" abre modal
+- [x] `app/(app)/leads/page.tsx` — página principal de leads
+- [x] `components/leads/LeadTable.tsx` — tabela com colunas: nome, empresa, e-mail, status, responsável, data
+- [x] `components/leads/LeadFilters.tsx` — filtros por status, responsável, data (Select + DatePicker)
+- [x] `components/leads/LeadSearch.tsx` — busca em tempo real por nome/empresa/e-mail
+- [x] Paginação (UI)
+- [x] Botão "Novo Lead" abre modal
 
 **Formulário**
-- [ ] `components/leads/LeadForm.tsx` — campos: nome*, e-mail*, telefone, empresa, cargo, status, responsável
-- [ ] Validação de campos obrigatórios (visual)
-- [ ] Modal de criação e edição usando `Dialog` do shadcn/ui
+- [x] `components/leads/LeadForm.tsx` — campos: nome*, e-mail*, telefone, empresa, cargo, status, responsável
+- [x] Validação de campos obrigatórios (visual)
+- [x] Modal de criação e edição usando `Dialog` do shadcn/ui
 
 **Detalhe do Lead**
 - [ ] `app/(app)/leads/[id]/page.tsx` — página de detalhe
@@ -127,7 +127,7 @@
 - [ ] `components/leads/ActivityTimeline.tsx` — timeline cronológica com tipo de atividade (ícone), autor, descrição e data
 - [ ] `components/leads/ActivityForm.tsx` — formulário inline: tipo (ligação/e-mail/reunião/nota), descrição, data
 - [ ] Negócios vinculados ao lead (lista lateral)
-- [ ] Mock data com pelo menos 5 leads e atividades variadas
+- [x] Mock data com pelo menos 5 leads e atividades variadas
 
 **Commit final:** `feat: leads UI — list, filters, form, detail page, activity timeline`
 
