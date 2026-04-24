@@ -79,23 +79,23 @@
 ### Entregas
 
 **App Shell**
-- [ ] `app/(app)/layout.tsx` — layout com sidebar fixa e área de conteúdo
-- [ ] `components/layout/Sidebar.tsx` — navegação: Dashboard, Leads, Pipeline, Atividades, Configurações
-- [ ] `components/layout/WorkspaceSwitcher.tsx` — dropdown com workspaces mock e opção "Criar workspace"
-- [ ] `components/layout/UserMenu.tsx` — avatar, nome, plano atual, logout
-- [ ] `components/layout/TopBar.tsx` — breadcrumb e busca global (UI)
-- [ ] Indicador visual do plano ativo (badge Free/Pro na sidebar)
-- [ ] Navegação ativa destacada na sidebar
+- [x] `app/(app)/layout.tsx` — layout com sidebar fixa e área de conteúdo
+- [x] `components/layout/Sidebar.tsx` — navegação: Dashboard, Leads, Pipeline, Atividades, Configurações
+- [x] `components/layout/WorkspaceSwitcher.tsx` — dropdown com workspaces mock e opção "Criar workspace"
+- [x] `components/layout/UserMenu.tsx` — avatar, nome, plano atual, logout
+- [x] `components/layout/TopBar.tsx` — breadcrumb e busca global (UI)
+- [x] Indicador visual do plano ativo (badge Free/Pro na sidebar)
+- [x] Navegação ativa destacada na sidebar
 
 **Auth Pages**
-- [ ] `app/(auth)/login/page.tsx` — formulário e-mail + senha, link "Esqueci a senha"
-- [ ] `app/(auth)/register/page.tsx` — formulário nome + e-mail + senha
-- [ ] `app/(auth)/onboarding/page.tsx` — fluxo de 2 etapas: criar workspace (nome + slug) → convidar membros (pular disponível)
-- [ ] `app/(auth)/invite/[token]/page.tsx` — página de aceite de convite
+- [x] `app/(auth)/login/page.tsx` — formulário e-mail + senha, link "Esqueci a senha"
+- [x] `app/(auth)/register/page.tsx` — formulário nome + e-mail + senha
+- [x] `app/(auth)/onboarding/page.tsx` — fluxo de 2 etapas: criar workspace (nome + slug) → convidar membros (pular disponível)
+- [x] `app/(auth)/invite/[token]/page.tsx` — página de aceite de convite
 
 **Geral**
-- [ ] Responsivo no mobile (sidebar colapsável)
-- [ ] Tema dark/light consistente
+- [x] Responsivo no mobile (sidebar colapsável)
+- [x] Tema dark/light consistente
 
 **Commit final:** `feat: app shell (sidebar, workspace switcher) and auth pages UI`
 

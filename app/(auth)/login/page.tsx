@@ -3,29 +3,45 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+
+type FieldErrors = { email?: string; password?: string }
+
+function validate(email: string, password: string): FieldErrors {
+  const errors: FieldErrors = {}
+  if (!email.trim()) {
+    errors.email = "E-mail obrigatório."
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = "E-mail inválido."
+  }
+  if (!password) {
+    errors.password = "Senha obrigatória."
+  } else if (password.length < 8) {
+    errors.password = "A senha deve ter pelo menos 8 caracteres."
+  }
+  return errors
+}
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [errors, setErrors] = useState<FieldErrors>({})
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError("")
-
-    if (!email.trim() || !password.trim()) {
-      setError("Preencha e-mail e senha.")
+    const fieldErrors = validate(email, password)
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors)
       return
     }
-
+    setErrors({})
     setLoading(true)
-    // Simula latência de rede até o backend ser conectado (M6)
-    await new Promise((r) => setTimeout(r, 600))
+    await new Promise((r) => setTimeout(r, 800))
     router.push("/dashboard")
   }
 
@@ -41,7 +57,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div className="space-y-1.5">
           <Label htmlFor="email">E-mail</Label>
           <Input
@@ -50,9 +66,17 @@ export default function LoginPage() {
             placeholder="seu@email.com"
             autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
+            }}
             disabled={loading}
+            aria-invalid={!!errors.email}
+            className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
           />
+          {errors.email && (
+            <p className="text-xs text-destructive">{errors.email}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -71,22 +95,33 @@ export default function LoginPage() {
             placeholder="••••••••"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
+            }}
             disabled={loading}
+            aria-invalid={!!errors.password}
+            className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
           />
+          {errors.password && (
+            <p className="text-xs text-destructive">{errors.password}</p>
+          )}
         </div>
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
-
         <Button type="submit" className="w-full h-10" disabled={loading}>
-          {loading ? "Entrando..." : "Entrar"}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Entrando...
+            </>
+          ) : (
+            "Entrar"
+          )}
         </Button>
       </form>
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        Modo demo — qualquer e-mail e senha funcionam.
+        Modo demo — qualquer e-mail e senha (8+ caracteres) funcionam.
       </p>
     </>
   )
