@@ -1,0 +1,45 @@
+"use client"
+
+import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar"
+import { cn } from "@/lib/utils"
+
+function Avatar({
+  className,
+  ...props
+}: AvatarPrimitive.Root.Props) {
+  return (
+    <AvatarPrimitive.Root
+      className={cn("relative flex shrink-0 overflow-hidden rounded-full", className)}
+      {...props}
+    />
+  )
+}
+
+function AvatarImage({
+  className,
+  ...props
+}: AvatarPrimitive.Image.Props) {
+  return (
+    <AvatarPrimitive.Image
+      className={cn("aspect-square size-full object-cover", className)}
+      {...props}
+    />
+  )
+}
+
+function AvatarFallback({
+  className,
+  ...props
+}: AvatarPrimitive.Fallback.Props) {
+  return (
+    <AvatarPrimitive.Fallback
+      className={cn(
+        "flex size-full items-center justify-center rounded-full bg-muted text-muted-foreground text-sm font-medium",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Avatar, AvatarImage, AvatarFallback }
