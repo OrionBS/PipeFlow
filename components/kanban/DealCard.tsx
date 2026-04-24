@@ -26,8 +26,14 @@ function formatDeadline(deadline: string): string {
 }
 
 export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: deal.id })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: deal.id })
 
   const overdue = isOverdue(deal.deadline)
 
@@ -40,25 +46,20 @@ export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardPro
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      {...listeners}
+      onClick={onClick}
       className={cn(
-        "group relative bg-white dark:bg-slate-800 rounded-lg border p-3 shadow-sm cursor-pointer select-none",
+        "group relative bg-white dark:bg-slate-800 rounded-lg border p-3 shadow-sm",
+        "cursor-grab active:cursor-grabbing select-none",
         "hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all",
         overdue
           ? "border-red-300 dark:border-red-700"
           : "border-slate-200 dark:border-slate-700",
-        isDragging && "opacity-50 shadow-lg scale-105"
+        isDragging && "opacity-40 shadow-lg ring-2 ring-indigo-400"
       )}
-      onClick={onClick}
     >
-      {/* handle de arraste */}
-      <div
-        {...attributes}
-        {...listeners}
-        onClick={(e) => e.stopPropagation()}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing text-slate-400 dark:text-slate-500"
-      >
-        <GripVertical className="h-4 w-4" />
-      </div>
+      <GripVertical className="absolute top-2 right-2 h-4 w-4 text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
       <p className="text-sm font-medium text-slate-900 dark:text-slate-100 pr-5 leading-tight">
         {deal.title}

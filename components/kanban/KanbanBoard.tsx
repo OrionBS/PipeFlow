@@ -38,9 +38,10 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [deals, setDeals] = useState<Deal[]>(initialDeals)
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
+  const didDragRef = { current: false }
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   )
 
   const dealsByStage = useCallback(
@@ -49,6 +50,7 @@ export function KanbanBoard({
   )
 
   function handleDragStart({ active }: DragStartEvent) {
+    didDragRef.current = true
     const found = deals.find((d) => d.id === active.id)
     setActiveDeal(found ?? null)
   }
@@ -74,6 +76,7 @@ export function KanbanBoard({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     setActiveDeal(null)
+    setTimeout(() => { didDragRef.current = false }, 0)
     if (!over) return
 
     const activeId = active.id as string
@@ -122,7 +125,9 @@ export function KanbanBoard({
               deals={dealsByStage(stage)}
               leadNames={leadNames}
               ownerInitials={ownerInitials}
-              onCardClick={onDealClick}
+              onCardClick={(deal) => {
+                if (!didDragRef.current) onDealClick(deal)
+              }}
             />
           ))}
         </div>
