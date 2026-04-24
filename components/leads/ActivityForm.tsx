@@ -35,6 +35,8 @@ export function ActivityForm({ leadId, onSubmit }: ActivityFormProps) {
       setError("Descrição é obrigatória.")
       return
     }
+    alert("Registrar atividade chegará no M8 com backend real.")
+    return
     const activity: Activity = {
       id: `act-${Date.now()}`,
       workspace_id: "ws-1",
