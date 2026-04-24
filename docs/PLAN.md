@@ -122,11 +122,11 @@
 - [x] Modal de criação e edição usando `Dialog` do shadcn/ui
 
 **Detalhe do Lead**
-- [ ] `app/(app)/leads/[id]/page.tsx` — página de detalhe
-- [ ] `components/leads/LeadProfile.tsx` — bloco com todos os dados do lead e botão editar
-- [ ] `components/leads/ActivityTimeline.tsx` — timeline cronológica com tipo de atividade (ícone), autor, descrição e data
-- [ ] `components/leads/ActivityForm.tsx` — formulário inline: tipo (ligação/e-mail/reunião/nota), descrição, data
-- [ ] Negócios vinculados ao lead (lista lateral)
+- [x] `app/(app)/leads/[id]/page.tsx` — página de detalhe
+- [x] `components/leads/LeadProfile.tsx` — bloco com todos os dados do lead e botão editar
+- [x] `components/leads/ActivityTimeline.tsx` — timeline cronológica com tipo de atividade (ícone), autor, descrição e data
+- [x] `components/leads/ActivityForm.tsx` — formulário inline: tipo (ligação/e-mail/reunião/nota), descrição, data
+- [x] Negócios vinculados ao lead (lista lateral)
 - [x] Mock data com pelo menos 5 leads e atividades variadas
 
 **Commit final:** `feat: leads UI — list, filters, form, detail page, activity timeline`
