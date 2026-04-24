@@ -35,7 +35,7 @@ export default function PipelinePage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       <KanbanBoard
         initialDeals={deals}
         leadNames={leadNames}
