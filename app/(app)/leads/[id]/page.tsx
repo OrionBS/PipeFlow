@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useParams, notFound } from "next/navigation"
+import { useState, use } from "react"
+import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, TrendingUp } from "lucide-react"
 import { LeadProfile } from "@/components/leads/LeadProfile"
@@ -24,18 +24,18 @@ const STAGE_LABELS: Record<string, string> = {
   closed_lost: "Fechado Perdido",
 }
 
-export default function LeadDetailPage() {
-  const params = useParams()
-  const id = params.id as string
+export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
 
   const initialLead = MOCK_LEADS.find((l) => l.id === id)
-  if (!initialLead) notFound()
 
-  const [lead, setLead] = useState<Lead>(initialLead!)
+  const [lead, setLead] = useState<Lead>(initialLead ?? MOCK_LEADS[0])
   const [activities, setActivities] = useState<Activity[]>(
     MOCK_ACTIVITIES.filter((a) => a.lead_id === id)
   )
   const [editOpen, setEditOpen] = useState(false)
+
+  if (!initialLead) notFound()
 
   const deals = MOCK_DEALS.filter((d) => d.lead_id === id)
 
