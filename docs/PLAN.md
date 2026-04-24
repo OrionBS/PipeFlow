@@ -56,16 +56,16 @@
 
 ### Entregas
 
-- [ ] Criar `app/page.tsx` com layout da landing page
-- [ ] Seção **Hero:** headline, subtítulo, CTA "Começar grátis" e "Ver demo"
-- [ ] Seção **Funcionalidades:** grid de 6 cards com ícones (Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Atividades, Planos)
-- [ ] Seção **Como funciona:** passo a passo visual (3 etapas)
-- [ ] Seção **Planos & Preços:** cards Free vs Pro com lista de features e botão de CTA
-- [ ] Seção **CTA final:** banner de conversão com botão
-- [ ] `components/landing/Navbar.tsx` — header público com logo e links
-- [ ] `components/landing/Footer.tsx` — rodapé com links e copyright
-- [ ] Responsivo (mobile-first)
-- [ ] Dark mode funcionando
+- [x] Criar `app/page.tsx` com layout da landing page
+- [x] Seção **Hero:** headline, subtítulo, CTA "Começar grátis" e "Ver demo"
+- [x] Seção **Funcionalidades:** grid de 6 cards com ícones (Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Atividades, Planos)
+- [x] Seção **Como funciona:** passo a passo visual (3 etapas)
+- [x] Seção **Planos & Preços:** cards Free vs Pro com lista de features e botão de CTA
+- [x] Seção **CTA final:** banner de conversão com botão
+- [x] `components/landing/Navbar.tsx` — header público com logo e links
+- [x] `components/landing/Footer.tsx` — rodapé com links e copyright
+- [x] Responsivo (mobile-first)
+- [x] Dark mode funcionando
 
 **Commit final:** `feat: landing page — hero, features, pricing, CTA sections`
 
