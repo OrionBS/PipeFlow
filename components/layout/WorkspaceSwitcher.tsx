@@ -11,7 +11,7 @@ export function WorkspaceSwitcher() {
   const [current, setCurrent] = useState<Workspace>(MOCK_CURRENT_WORKSPACE)
 
   return (
-    <Menu.Root>
+    <Menu.Root modal={false}>
       <Menu.Trigger className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-sidebar-accent outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-bold uppercase">
           {current.name.charAt(0)}
@@ -23,8 +23,14 @@ export function WorkspaceSwitcher() {
       </Menu.Trigger>
 
       <Menu.Portal>
-        <Menu.Positioner side="bottom" align="start" sideOffset={6}>
-          <Menu.Popup className="z-50 min-w-56 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-lg outline-none data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity duration-150">
+        <Menu.Positioner
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          positionMethod="fixed"
+          className="z-50"
+        >
+          <Menu.Popup className="min-w-56 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-lg outline-none">
             <p className="px-2 py-1 text-xs font-medium text-muted-foreground">
               Workspaces
             </p>
