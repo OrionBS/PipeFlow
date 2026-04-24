@@ -127,7 +127,7 @@
 - [x] `components/leads/ActivityTimeline.tsx` — timeline cronológica com tipo de atividade (ícone), autor, descrição e data
 - [x] `components/leads/ActivityForm.tsx` — formulário inline: tipo (ligação/e-mail/reunião/nota), descrição, data
 - [x] Negócios vinculados ao lead (lista lateral)
-- [x] Mock data com pelo menos 5 leads e atividades variadas
+- [x] Mock data com pelo menos 5 leads e atividades variadas (expandido para 15 leads, 27 atividades, todos os status cobertos)
 
 **Commit final:** `feat: leads UI — list, filters, form, detail page, activity timeline`
 
