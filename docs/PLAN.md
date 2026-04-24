@@ -42,7 +42,7 @@
 - [x] Criar `.env.local` com todas as variáveis (valores vazios)
 - [x] Criar `.env.example` com as mesmas variáveis (para o repo)
 - [x] Configurar `.gitignore` (incluir `.env.local`)
-- [ ] Inicializar repositório Git e subir para GitHub
+- [x] Inicializar repositório Git e subir para GitHub
 - [ ] Linkar projeto ao Vercel e fazer primeiro deploy
 
 **Commit final:** `chore: project scaffolding — Next.js 14, Tailwind, shadcn/ui, folder structure`
