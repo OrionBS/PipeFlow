@@ -140,17 +140,17 @@
 
 ### Entregas
 
-- [ ] Instalar `@dnd-kit/core` e `@dnd-kit/sortable`
-- [ ] `app/(app)/pipeline/page.tsx` — página do pipeline
-- [ ] `components/kanban/KanbanBoard.tsx` — container principal com DndContext
-- [ ] `components/kanban/KanbanColumn.tsx` — coluna por etapa com título, valor total e contador de cards
-- [ ] `components/kanban/DealCard.tsx` — card com título do negócio, valor (R$), lead vinculado, responsável (avatar), prazo e indicador de atraso
-- [ ] 6 colunas: Novo Lead → Contato Realizado → Proposta Enviada → Negociação → Fechado Ganho → Fechado Perdido
-- [ ] Drag-and-drop entre colunas (estado local, sem backend)
-- [ ] Colunas "Fechado Ganho" e "Fechado Perdido" com cores distintas (verde/vermelho)
-- [ ] Modal "Novo Negócio" — campos: título, valor, lead, responsável, prazo, etapa inicial
-- [ ] Modal de detalhe do negócio ao clicar no card
-- [ ] Mock data com pelo menos 8 negócios distribuídos nas colunas
+- [x] Instalar `@dnd-kit/core` e `@dnd-kit/sortable`
+- [x] `app/(app)/pipeline/page.tsx` — página do pipeline
+- [x] `components/kanban/KanbanBoard.tsx` — container principal com DndContext
+- [x] `components/kanban/KanbanColumn.tsx` — coluna por etapa com título, valor total e contador de cards
+- [x] `components/kanban/DealCard.tsx` — card com título do negócio, valor (R$), lead vinculado, responsável (avatar), prazo e indicador de atraso
+- [x] 6 colunas: Novo Lead → Contato Realizado → Proposta Enviada → Negociação → Fechado Ganho → Fechado Perdido
+- [x] Drag-and-drop entre colunas (estado local, sem backend)
+- [x] Colunas "Fechado Ganho" e "Fechado Perdido" com cores distintas (verde/vermelho)
+- [x] Modal "Novo Negócio" — campos: título, valor, lead, responsável, prazo, etapa inicial
+- [x] Modal de detalhe do negócio ao clicar no card
+- [x] Mock data com pelo menos 8 negócios distribuídos nas colunas (12 negócios, 15 leads)
 - [ ] Scroll horizontal no mobile
 
 **Commit final:** `feat: kanban pipeline UI — columns, deal cards, drag-and-drop`
