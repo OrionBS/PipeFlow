@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useMemo, useRef } from "react"
 import {
   DndContext,
   DragEndEvent,
@@ -13,8 +13,9 @@ import {
   closestCorners,
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
-import { Plus } from "lucide-react"
+import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { KanbanColumn, COLUMN_CONFIG } from "./KanbanColumn"
 import { DealCard } from "./DealCard"
 import type { Deal, DealStage } from "@/types"
@@ -38,16 +39,29 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [deals, setDeals] = useState<Deal[]>(initialDeals)
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
-  const didDragRef = { current: false }
+  const [search, setSearch] = useState("")
+  const didDragRef = useRef(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   )
 
-  const dealsByStage = useCallback(
-    (stage: DealStage) => deals.filter((d) => d.stage === stage),
-    [deals]
-  )
+  const visibleDeals = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return deals
+    return deals.filter((d) => {
+      const leadName = (leadNames[d.lead_id] ?? "").toLowerCase()
+      const title = d.title.toLowerCase()
+      return leadName.includes(q) || title.includes(q)
+    })
+  }, [deals, search, leadNames])
+
+  const dealsByStage = useMemo(() => {
+    const map = new Map<DealStage, Deal[]>()
+    for (const stage of STAGES) map.set(stage, [])
+    for (const deal of visibleDeals) map.get(deal.stage)?.push(deal)
+    return map
+  }, [visibleDeals])
 
   function handleDragStart({ active }: DragStartEvent) {
     didDragRef.current = true
@@ -95,16 +109,28 @@ export function KanbanBoard({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="shrink-0">
           <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             Pipeline
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {deals.length} negócio{deals.length !== 1 ? "s" : ""} no total
+            {visibleDeals.length} negócio{visibleDeals.length !== 1 ? "s" : ""}
+            {search.trim() ? " encontrado" + (visibleDeals.length !== 1 ? "s" : "") : " no total"}
           </p>
         </div>
-        <Button onClick={onNewDeal} size="sm" className="gap-2">
+
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar lead ou negócio..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <Button onClick={onNewDeal} size="sm" className="gap-2 shrink-0">
           <Plus className="h-4 w-4" />
           Novo Negócio
         </Button>
@@ -122,7 +148,7 @@ export function KanbanBoard({
             <KanbanColumn
               key={stage}
               stage={stage}
-              deals={dealsByStage(stage)}
+              deals={dealsByStage.get(stage) ?? []}
               leadNames={leadNames}
               ownerInitials={ownerInitials}
               onCardClick={(deal) => {
