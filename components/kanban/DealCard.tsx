@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { CalendarDays, GripVertical } from "lucide-react"
+import { CalendarDays } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
 import type { Deal } from "@/types"
 
@@ -23,6 +23,22 @@ function formatDeadline(deadline: string): string {
     day: "2-digit",
     month: "short",
   })
+}
+
+function avatarColor(initials: string): string {
+  const colors = [
+    "bg-violet-500",
+    "bg-indigo-500",
+    "bg-sky-500",
+    "bg-teal-500",
+    "bg-emerald-500",
+    "bg-amber-500",
+    "bg-rose-500",
+    "bg-pink-500",
+  ]
+  let hash = 0
+  for (let i = 0; i < initials.length; i++) hash += initials.charCodeAt(i)
+  return colors[hash % colors.length]
 }
 
 export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardProps) {
@@ -50,49 +66,66 @@ export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardPro
       {...listeners}
       onClick={onClick}
       className={cn(
-        "group relative bg-white dark:bg-slate-800 rounded-lg border p-3 shadow-sm",
-        "cursor-grab active:cursor-grabbing select-none",
-        "hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500 transition-all",
+        "group relative rounded-lg border select-none cursor-grab active:cursor-grabbing",
+        "bg-white dark:bg-slate-900",
+        "transition-all duration-150",
+        "hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-200/80 dark:hover:shadow-slate-950/80",
         overdue
-          ? "border-red-300 dark:border-red-700"
-          : "border-slate-200 dark:border-slate-700",
-        isDragging && "opacity-40 shadow-lg ring-2 ring-indigo-400"
+          ? "border-red-200 dark:border-red-900/60 shadow-sm shadow-red-100 dark:shadow-red-950/30"
+          : "border-slate-200 dark:border-slate-800 shadow-sm",
+        isDragging && "opacity-30 scale-[0.98]"
       )}
     >
-      <GripVertical className="absolute top-2 right-2 h-4 w-4 text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      {/* color bar esquerda */}
+      <div
+        className={cn(
+          "absolute left-0 top-2 bottom-2 w-0.5 rounded-full",
+          overdue
+            ? "bg-red-400 dark:bg-red-600"
+            : "bg-indigo-400/60 dark:bg-indigo-500/40"
+        )}
+      />
 
-      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 pr-5 leading-tight">
-        {deal.title}
-      </p>
+      <div className="px-3 py-2.5 pl-4">
+        <p className="text-[13px] font-medium text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">
+          {deal.title}
+        </p>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
-        {leadName}
-      </p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+          {leadName}
+        </p>
 
-      <p className="text-base font-semibold text-indigo-600 dark:text-indigo-400 mt-2">
-        {formatCurrency(deal.value)}
-      </p>
+        <p className="font-mono text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-2 tracking-tight">
+          {formatCurrency(deal.value)}
+        </p>
 
-      <div className="flex items-center justify-between mt-3">
-        {deal.deadline ? (
-          <span
+        <div className="flex items-center justify-between mt-2">
+          {deal.deadline ? (
+            <span
+              className={cn(
+                "flex items-center gap-1 text-[11px] font-medium",
+                overdue
+                  ? "text-red-500 dark:text-red-400"
+                  : "text-slate-400 dark:text-slate-500"
+              )}
+            >
+              <CalendarDays className="h-3 w-3 shrink-0" />
+              {formatDeadline(deal.deadline)}
+              {overdue && <span className="text-red-500 dark:text-red-400">· atrasado</span>}
+            </span>
+          ) : (
+            <span />
+          )}
+
+          <div
             className={cn(
-              "flex items-center gap-1 text-xs",
-              overdue
-                ? "text-red-600 dark:text-red-400 font-medium"
-                : "text-slate-500 dark:text-slate-400"
+              "h-6 w-6 rounded-full flex items-center justify-center",
+              "text-[10px] font-bold text-white shrink-0",
+              avatarColor(ownerInitials)
             )}
           >
-            <CalendarDays className="h-3 w-3" />
-            {formatDeadline(deal.deadline)}
-            {overdue && " • atrasado"}
-          </span>
-        ) : (
-          <span />
-        )}
-
-        <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-[10px] font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
-          {ownerInitials}
+            {ownerInitials}
+          </div>
         </div>
       </div>
     </div>

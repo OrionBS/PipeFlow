@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import { COLUMN_CONFIG } from "./KanbanColumn"
 import type { Deal, DealStage, Lead } from "@/types"
 
@@ -53,6 +54,8 @@ const EMPTY: FormState = {
   deadline: "",
   stage: "new_lead",
 }
+
+const STAGES = Object.entries(COLUMN_CONFIG) as [DealStage, { label: string; color: string }][]
 
 export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealModalProps) {
   const [form, setForm] = useState<FormState>(EMPTY)
@@ -98,119 +101,150 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Novo Negócio</DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <DialogTitle className="text-base font-semibold">Novo Negócio</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-2">
+        <div className="px-6 py-5 grid gap-4">
           {/* Título */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="deal-title">
-              Título <span className="text-red-500">*</span>
-            </Label>
+          <Field label="Título" required error={errors.title}>
             <Input
               id="deal-title"
-              placeholder="Ex: Licença Pro - Empresa X"
+              placeholder="Ex: Licença Pro — Empresa X"
               value={form.title}
               onChange={(e) => set("title")(e.target.value)}
+              className={cn(errors.title && "border-red-400 dark:border-red-700 focus-visible:ring-red-300")}
             />
-            {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
-          </div>
+          </Field>
 
           {/* Valor */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="deal-value">
-              Valor (R$) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="deal-value"
-              type="number"
-              min="0"
-              placeholder="0,00"
-              value={form.value}
-              onChange={(e) => set("value")(e.target.value)}
-            />
-            {errors.value && <p className="text-xs text-red-500">{errors.value}</p>}
-          </div>
+          <Field label="Valor (R$)" required error={errors.value}>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium select-none">
+                R$
+              </span>
+              <Input
+                id="deal-value"
+                type="number"
+                min="0"
+                placeholder="0,00"
+                value={form.value}
+                onChange={(e) => set("value")(e.target.value)}
+                className={cn(
+                  "pl-9 font-mono",
+                  errors.value && "border-red-400 dark:border-red-700 focus-visible:ring-red-300"
+                )}
+              />
+            </div>
+          </Field>
 
           {/* Lead */}
-          <div className="grid gap-1.5">
-            <Label>
-              Lead vinculado <span className="text-red-500">*</span>
-            </Label>
+          <Field label="Lead vinculado" required error={errors.lead_id}>
             <Select value={form.lead_id} onValueChange={set("lead_id")}>
-              <SelectTrigger>
+              <SelectTrigger className={cn(errors.lead_id && "border-red-400 dark:border-red-700")}>
                 <SelectValue placeholder="Selecione um lead" />
               </SelectTrigger>
               <SelectContent>
                 {leads.map((lead) => (
                   <SelectItem key={lead.id} value={lead.id}>
-                    {lead.name} {lead.company ? `— ${lead.company}` : ""}
+                    {lead.name}{lead.company ? ` — ${lead.company}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.lead_id && <p className="text-xs text-red-500">{errors.lead_id}</p>}
-          </div>
+          </Field>
 
-          {/* Responsável */}
+          {/* Etapa — pills visuais */}
           <div className="grid gap-1.5">
-            <Label>Responsável</Label>
-            <Select value={form.owner_id} onValueChange={set("owner_id")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o responsável" />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((m) => (
-                  <SelectItem key={m.id} value={m.user_id ?? m.id}>
-                    {m.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+              Etapa inicial
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {STAGES.map(([stage, { label, color }]) => (
+                <button
+                  key={stage}
+                  type="button"
+                  onClick={() => set("stage")(stage)}
+                  className={cn(
+                    "text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all",
+                    form.stage === stage
+                      ? color === "won"
+                        ? "bg-emerald-500 border-emerald-500 text-white"
+                        : color === "lost"
+                          ? "bg-red-500 border-red-500 text-white"
+                          : "bg-indigo-600 border-indigo-600 text-white"
+                      : "bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
+            {/* Responsável */}
+            <Field label="Responsável">
+              <Select value={form.owner_id} onValueChange={set("owner_id")}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Nenhum" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.user_id ?? m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
             {/* Prazo */}
-            <div className="grid gap-1.5">
-              <Label htmlFor="deal-deadline">Prazo</Label>
+            <Field label="Prazo">
               <Input
                 id="deal-deadline"
                 type="date"
                 value={form.deadline}
                 onChange={(e) => set("deadline")(e.target.value)}
+                className="h-9 text-sm"
               />
-            </div>
-
-            {/* Etapa */}
-            <div className="grid gap-1.5">
-              <Label>Etapa inicial</Label>
-              <Select value={form.stage} onValueChange={set("stage")}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(COLUMN_CONFIG) as [DealStage, { label: string }][]).map(
-                    ([stage, { label }]) => (
-                      <SelectItem key={stage} value={stage}>
-                        {label}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+            </Field>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+        <DialogFooter className="px-6 pb-6 pt-0 gap-2">
+          <Button variant="outline" size="sm" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button onClick={handleSave}>Salvar negócio</Button>
+          <Button size="sm" onClick={handleSave} className="font-medium">
+            Salvar negócio
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="grid gap-1.5">
+      <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+      </Label>
+      {children}
+      {error && <p className="text-[11px] text-red-500 font-medium">{error}</p>}
+    </div>
   )
 }

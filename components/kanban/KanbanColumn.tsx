@@ -40,47 +40,77 @@ export function KanbanColumn({
   const totalValue = deals.reduce((sum, d) => sum + d.value, 0)
 
   return (
-    <div className="flex flex-col w-64 shrink-0">
-      {/* cabeçalho da coluna */}
+    <div className="flex flex-col w-[272px] shrink-0 snap-start">
+      {/* cabeçalho */}
       <div
         className={cn(
-          "flex items-center justify-between px-3 py-2 rounded-t-lg border-t-2",
+          "flex items-center justify-between px-3 py-2.5 rounded-t-xl",
+          "border border-b-0",
           color === "won"
-            ? "border-green-500 bg-green-50 dark:bg-green-950/40"
+            ? "border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30"
             : color === "lost"
-              ? "border-red-500 bg-red-50 dark:bg-red-950/40"
-              : "border-indigo-400 bg-slate-50 dark:bg-slate-800/60"
+              ? "border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30"
+              : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60"
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span
             className={cn(
-              "text-sm font-semibold",
+              "text-[13px] font-semibold leading-none truncate",
               color === "won"
-                ? "text-green-800 dark:text-green-300"
+                ? "text-emerald-800 dark:text-emerald-300"
                 : color === "lost"
-                  ? "text-red-800 dark:text-red-300"
-                  : "text-slate-800 dark:text-slate-200"
+                  ? "text-red-700 dark:text-red-400"
+                  : "text-slate-700 dark:text-slate-200"
             )}
           >
             {label}
           </span>
-          <span className="text-xs font-medium bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full px-1.5 py-0.5">
+          <span
+            className={cn(
+              "text-[11px] font-bold rounded-full px-1.5 py-0.5 leading-none tabular-nums shrink-0",
+              color === "won"
+                ? "bg-emerald-200 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300"
+                : color === "lost"
+                  ? "bg-red-200 dark:bg-red-900/60 text-red-600 dark:text-red-400"
+                  : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300"
+            )}
+          >
             {deals.length}
           </span>
         </div>
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-          {formatCurrency(totalValue)}
-        </span>
+
+        {totalValue > 0 && (
+          <span
+            className={cn(
+              "font-mono text-[11px] font-semibold tabular-nums shrink-0 ml-2",
+              color === "won"
+                ? "text-emerald-700 dark:text-emerald-400"
+                : color === "lost"
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-slate-500 dark:text-slate-400"
+            )}
+          >
+            {formatCurrency(totalValue)}
+          </span>
+        )}
       </div>
 
       {/* área de drop */}
       <div
         ref={setNodeRef}
         className={cn(
-          "flex flex-col gap-2 p-2 rounded-b-lg min-h-[120px] flex-1 transition-colors",
-          "bg-slate-100/60 dark:bg-slate-800/30 border border-t-0 border-slate-200 dark:border-slate-700",
-          isOver && "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-300 dark:border-indigo-700"
+          "flex flex-col gap-2 p-2 rounded-b-xl flex-1 min-h-[140px]",
+          "border border-slate-200 dark:border-slate-800",
+          "transition-colors duration-150",
+          color === "won"
+            ? "bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-900/60"
+            : color === "lost"
+              ? "bg-red-50/50 dark:bg-red-950/10 border-red-200 dark:border-red-900/60"
+              : "bg-slate-50/80 dark:bg-slate-900/30",
+          isOver && color === "default" && "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-300 dark:border-indigo-800",
+          isOver && color === "won" && "bg-emerald-100/60 dark:bg-emerald-950/30",
+          isOver && color === "lost" && "bg-red-100/60 dark:bg-red-950/30"
         )}
       >
         <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
@@ -96,9 +126,11 @@ export function KanbanColumn({
         </SortableContext>
 
         {deals.length === 0 && (
-          <p className="text-xs text-slate-400 dark:text-slate-600 text-center pt-4 select-none">
-            Arraste um negócio aqui
-          </p>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-[11px] text-slate-300 dark:text-slate-700 select-none">
+              Arraste aqui
+            </p>
+          </div>
         )}
       </div>
     </div>
