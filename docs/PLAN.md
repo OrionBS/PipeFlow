@@ -43,7 +43,7 @@
 - [x] Criar `.env.example` com as mesmas variáveis (para o repo)
 - [x] Configurar `.gitignore` (incluir `.env.local`)
 - [x] Inicializar repositório Git e subir para GitHub
-- [ ] Linkar projeto ao Vercel e fazer primeiro deploy
+- [x] Linkar projeto ao Vercel e fazer primeiro deploy
 
 **Commit final:** `chore: project scaffolding — Next.js 14, Tailwind, shadcn/ui, folder structure`
 
@@ -151,7 +151,7 @@
 - [x] Modal "Novo Negócio" — campos: título, valor, lead, responsável, prazo, etapa inicial
 - [x] Modal de detalhe do negócio ao clicar no card
 - [x] Mock data com pelo menos 8 negócios distribuídos nas colunas (12 negócios, 15 leads)
-- [ ] Scroll horizontal no mobile
+- [x] Scroll horizontal no mobile
 
 **Commit final:** `feat: kanban pipeline UI — columns, deal cards, drag-and-drop`
 
@@ -165,20 +165,20 @@
 ### Entregas
 
 **Dashboard**
-- [ ] Instalar `recharts`
-- [ ] `app/(app)/dashboard/page.tsx`
-- [ ] `components/dashboard/MetricCard.tsx` — card com título, valor, variação percentual e ícone
-- [ ] 4 metric cards: Total de Leads, Negócios Abertos, Valor do Pipeline (R$), Taxa de Conversão (%)
-- [ ] `components/dashboard/FunnelChart.tsx` — gráfico de funil por etapa do pipeline (Recharts)
-- [ ] `components/dashboard/DealsDeadlineList.tsx` — lista de negócios com prazo próximo (próximos 7 dias)
-- [ ] Filtro de período no dashboard (últimos 7d / 30d / 90d) — UI apenas
+- [x] Instalar `recharts`
+- [x] `app/(app)/dashboard/page.tsx`
+- [x] `components/dashboard/MetricCard.tsx` — card com título, valor, variação percentual e ícone
+- [x] 4 metric cards: Total de Leads, Negócios Abertos, Valor do Pipeline (R$), Taxa de Conversão (%)
+- [x] `components/dashboard/FunnelChart.tsx` — gráfico de funil por etapa do pipeline (Recharts)
+- [x] `components/dashboard/DealsDeadlineList.tsx` — lista de negócios com prazo próximo (próximos 7 dias)
+- [x] Filtro de período no dashboard (últimos 7d / 30d / 90d) — UI apenas
 
 **Settings**
-- [ ] `app/(app)/settings/page.tsx` — hub de configurações com menu lateral
-- [ ] `app/(app)/settings/workspace/page.tsx` — nome, logo (upload UI), slug do workspace
-- [ ] `app/(app)/settings/members/page.tsx` — tabela de membros com papel (Admin/Membro) e botão remover; formulário de convite por e-mail
-- [ ] `app/(app)/settings/billing/page.tsx` — plano atual, uso (leads X/50, membros X/2 para Free), botão "Fazer upgrade" e link "Gerenciar assinatura"
-- [ ] `app/(app)/settings/profile/page.tsx` — nome, e-mail, avatar, alterar senha
+- [x] `app/(app)/settings/page.tsx` — hub de configurações com menu lateral
+- [x] `app/(app)/settings/workspace/page.tsx` — nome, logo (upload UI), slug do workspace
+- [x] `app/(app)/settings/members/page.tsx` — tabela de membros com papel (Admin/Membro) e botão remover; formulário de convite por e-mail
+- [x] `app/(app)/settings/billing/page.tsx` — plano atual, uso (leads X/50, membros X/2 para Free), botão "Fazer upgrade" e link "Gerenciar assinatura"
+- [x] `app/(app)/settings/profile/page.tsx` — nome, e-mail, avatar, alterar senha
 
 **Commit final:** `feat: dashboard UI (metrics, funnel chart) and settings pages`
 
@@ -192,10 +192,10 @@
 ### Entregas
 
 **Supabase Setup**
-- [ ] Criar projeto no Supabase e preencher variáveis de ambiente
-- [ ] Instalar `@supabase/supabase-js` e `@supabase/ssr`
-- [ ] Criar `lib/supabase/client.ts` (browser) e `lib/supabase/server.ts` (server + cookies)
-- [ ] Criar `middleware.ts` — proteger rotas `/(app)` e redirecionar para `/login`
+- [x] Criar projeto no Supabase e preencher variáveis de ambiente
+- [x] Instalar `@supabase/supabase-js` e `@supabase/ssr`
+- [x] Criar `lib/supabase/client.ts` (browser) e `lib/supabase/server.ts` (server + cookies)
+- [x] Criar `middleware.ts` — proteger rotas `/(app)` e redirecionar para `/login`
 
 **Schema SQL**
 - [ ] Tabela `workspaces` — id, name, slug, plan, stripe_customer_id, stripe_subscription_id, created_at
