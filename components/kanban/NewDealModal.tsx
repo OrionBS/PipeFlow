@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import { COLUMN_CONFIG } from "./KanbanColumn"
 import type { Deal, DealStage, Lead } from "@/types"
 
@@ -53,6 +54,8 @@ const EMPTY: FormState = {
   deadline: "",
   stage: "new_lead",
 }
+
+const STAGES = Object.entries(COLUMN_CONFIG) as [DealStage, { label: string; color: string; accent: string }][]
 
 export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealModalProps) {
   const [form, setForm] = useState<FormState>(EMPTY)
@@ -96,121 +99,234 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
     }
   }
 
+  const inputStyle = {
+    background: "rgba(26,26,30,0.8)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    color: "#E8E8E8",
+    fontFamily: "var(--font-dm-sans, sans-serif)",
+  }
+
+  const inputErrorStyle = {
+    ...inputStyle,
+    border: "1px solid rgba(239,68,68,0.5)",
+  }
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Novo Negócio</DialogTitle>
+      <DialogContent
+        className="sm:max-w-[480px] p-0 gap-0 overflow-hidden border-0"
+        style={{
+          background: "rgba(14,14,16,0.98)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "16px",
+        }}
+      >
+        <DialogHeader
+          className="px-6 pt-6 pb-4"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <DialogTitle
+            className="text-base font-bold"
+            style={{
+              fontFamily: "var(--font-syne, sans-serif)",
+              color: "#E8E8E8",
+            }}
+          >
+            Novo Negócio
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-2">
+        <div className="px-6 py-5 grid gap-4">
           {/* Título */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="deal-title">
-              Título <span className="text-red-500">*</span>
-            </Label>
+          <Field label="Título" required error={errors.title}>
             <Input
-              id="deal-title"
-              placeholder="Ex: Licença Pro - Empresa X"
+              placeholder="Ex: Licença Pro — Empresa X"
               value={form.title}
               onChange={(e) => set("title")(e.target.value)}
+              className="h-9 text-sm border-0 focus-visible:ring-1 focus-visible:ring-[rgba(202,255,51,0.4)]"
+              style={errors.title ? inputErrorStyle : inputStyle}
             />
-            {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
-          </div>
+          </Field>
 
           {/* Valor */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="deal-value">
-              Valor (R$) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="deal-value"
-              type="number"
-              min="0"
-              placeholder="0,00"
-              value={form.value}
-              onChange={(e) => set("value")(e.target.value)}
-            />
-            {errors.value && <p className="text-xs text-red-500">{errors.value}</p>}
-          </div>
+          <Field label="Valor (R$)" required error={errors.value}>
+            <div className="relative">
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm select-none"
+                style={{ color: "#555559", fontFamily: "var(--font-ibm-mono, monospace)" }}
+              >
+                R$
+              </span>
+              <Input
+                type="number"
+                min="0"
+                placeholder="0,00"
+                value={form.value}
+                onChange={(e) => set("value")(e.target.value)}
+                className="h-9 text-sm pl-9 border-0 focus-visible:ring-1 focus-visible:ring-[rgba(202,255,51,0.4)]"
+                style={{
+                  ...(errors.value ? inputErrorStyle : inputStyle),
+                  fontFamily: "var(--font-ibm-mono, monospace)",
+                  color: "#CAFF33",
+                }}
+              />
+            </div>
+          </Field>
 
           {/* Lead */}
-          <div className="grid gap-1.5">
-            <Label>
-              Lead vinculado <span className="text-red-500">*</span>
-            </Label>
+          <Field label="Lead vinculado" required error={errors.lead_id}>
             <Select value={form.lead_id} onValueChange={set("lead_id")}>
-              <SelectTrigger>
+              <SelectTrigger
+                className="h-9 text-sm border-0 focus:ring-1 focus:ring-[rgba(202,255,51,0.4)]"
+                style={errors.lead_id ? inputErrorStyle : inputStyle}
+              >
                 <SelectValue placeholder="Selecione um lead" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent style={{ background: "#141416", border: "1px solid rgba(255,255,255,0.08)" }}>
                 {leads.map((lead) => (
-                  <SelectItem key={lead.id} value={lead.id}>
-                    {lead.name} {lead.company ? `— ${lead.company}` : ""}
+                  <SelectItem key={lead.id} value={lead.id} style={{ color: "#E8E8E8" }}>
+                    {lead.name}{lead.company ? ` — ${lead.company}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.lead_id && <p className="text-xs text-red-500">{errors.lead_id}</p>}
-          </div>
+          </Field>
 
-          {/* Responsável */}
+          {/* Etapa — pills com cor do estágio */}
           <div className="grid gap-1.5">
-            <Label>Responsável</Label>
-            <Select value={form.owner_id} onValueChange={set("owner_id")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o responsável" />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((m) => (
-                  <SelectItem key={m.id} value={m.user_id ?? m.id}>
-                    {m.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label
+              className="text-[10px] uppercase tracking-widest font-medium"
+              style={{ color: "#555559", fontFamily: "var(--font-ibm-mono, monospace)" }}
+            >
+              Etapa inicial
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {STAGES.map(([stage, { label, accent }]) => {
+                const active = form.stage === stage
+                return (
+                  <button
+                    key={stage}
+                    type="button"
+                    onClick={() => set("stage")(stage)}
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all duration-150"
+                    style={{
+                      fontFamily: "var(--font-dm-sans, sans-serif)",
+                      background: active ? accent : "transparent",
+                      color: active ? "#0C0C0E" : "#8A8A8F",
+                      border: active ? `1px solid ${accent}` : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
+            {/* Responsável */}
+            <Field label="Responsável">
+              <Select value={form.owner_id} onValueChange={set("owner_id")}>
+                <SelectTrigger
+                  className="h-9 text-sm border-0"
+                  style={inputStyle}
+                >
+                  <SelectValue placeholder="Nenhum" />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#141416", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.user_id ?? m.id} style={{ color: "#E8E8E8" }}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
             {/* Prazo */}
-            <div className="grid gap-1.5">
-              <Label htmlFor="deal-deadline">Prazo</Label>
+            <Field label="Prazo">
               <Input
-                id="deal-deadline"
                 type="date"
                 value={form.deadline}
                 onChange={(e) => set("deadline")(e.target.value)}
+                className="h-9 text-sm border-0"
+                style={inputStyle}
               />
-            </div>
-
-            {/* Etapa */}
-            <div className="grid gap-1.5">
-              <Label>Etapa inicial</Label>
-              <Select value={form.stage} onValueChange={set("stage")}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(COLUMN_CONFIG) as [DealStage, { label: string }][]).map(
-                    ([stage, { label }]) => (
-                      <SelectItem key={stage} value={stage}>
-                        {label}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+            </Field>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+        <DialogFooter
+          className="px-6 pb-6 pt-0 gap-2"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClose}
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#8A8A8F",
+              fontFamily: "var(--font-dm-sans, sans-serif)",
+            }}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSave}>Salvar negócio</Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            className="font-semibold transition-all duration-200"
+            style={{
+              background: "#CAFF33",
+              color: "#0C0C0E",
+              border: "none",
+              fontFamily: "var(--font-syne, sans-serif)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(202,255,51,0.3)"
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = ""
+            }}
+          >
+            Salvar negócio
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="grid gap-1.5">
+      <Label
+        className="text-[10px] uppercase tracking-widest font-medium"
+        style={{ color: "#555559", fontFamily: "var(--font-ibm-mono, monospace)" }}
+      >
+        {label}
+        {required && <span style={{ color: "#EF4444" }} className="ml-0.5">*</span>}
+      </Label>
+      {children}
+      {error && (
+        <p
+          className="text-[11px] font-medium"
+          style={{ color: "#EF4444", fontFamily: "var(--font-dm-sans, sans-serif)" }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
   )
 }
