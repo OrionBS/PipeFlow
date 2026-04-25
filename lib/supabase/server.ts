@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
-export async function createClient() {
+// Async — must be awaited. Creates a fresh client per request (server-side).
+export async function createClient(): Promise<SupabaseClient> {
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -18,7 +20,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component — cookies set by middleware
+            // Called from a Server Component — cookie writes are handled by middleware
           }
         },
       },
