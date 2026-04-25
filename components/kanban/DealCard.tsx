@@ -10,6 +10,7 @@ interface DealCardProps {
   deal: Deal
   leadName: string
   ownerInitials: string
+  stageAccent: string
   onClick: () => void
 }
 
@@ -20,28 +21,22 @@ function isOverdue(deadline: string | null): boolean {
 
 function formatDeadline(deadline: string): string {
   return new Date(deadline).toLocaleDateString("pt-BR", {
-    day: "2-digit",
+    day: "numeric",
     month: "short",
   })
 }
 
-function avatarColor(initials: string): string {
+function avatarBg(initials: string): string {
   const colors = [
-    "bg-violet-500",
-    "bg-indigo-500",
-    "bg-sky-500",
-    "bg-teal-500",
-    "bg-emerald-500",
-    "bg-amber-500",
-    "bg-rose-500",
-    "bg-pink-500",
+    "#7C3AED", "#4F46E5", "#0284C7", "#0D9488",
+    "#059669", "#D97706", "#DC2626", "#DB2777",
   ]
   let hash = 0
   for (let i = 0; i < initials.length; i++) hash += initials.charCodeAt(i)
   return colors[hash % colors.length]
 }
 
-export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardProps) {
+export function DealCard({ deal, leadName, ownerInitials, stageAccent, onClick }: DealCardProps) {
   const {
     attributes,
     listeners,
@@ -66,65 +61,117 @@ export function DealCard({ deal, leadName, ownerInitials, onClick }: DealCardPro
       {...listeners}
       onClick={onClick}
       className={cn(
-        "group relative rounded-lg border select-none cursor-grab active:cursor-grabbing",
-        "bg-white dark:bg-slate-900",
-        "transition-all duration-150",
-        "hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-200/80 dark:hover:shadow-slate-950/80",
-        overdue
-          ? "border-red-200 dark:border-red-900/60 shadow-sm shadow-red-100 dark:shadow-red-950/30"
-          : "border-slate-200 dark:border-slate-800 shadow-sm",
-        isDragging && "opacity-30 scale-[0.98]"
+        "group relative rounded-lg select-none cursor-grab active:cursor-grabbing",
+        "transition-all duration-200",
+        isDragging && "opacity-20 scale-[0.97]"
       )}
     >
-      {/* color bar esquerda */}
       <div
-        className={cn(
-          "absolute left-0 top-2 bottom-2 w-0.5 rounded-full",
-          overdue
-            ? "bg-red-400 dark:bg-red-600"
-            : "bg-indigo-400/60 dark:bg-indigo-500/40"
-        )}
-      />
+        className="rounded-lg overflow-hidden transition-all duration-200"
+        style={{
+          background: "#1A1A1E",
+          border: overdue
+            ? "1px solid rgba(239,68,68,0.3)"
+            : "1px solid rgba(255,255,255,0.06)",
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderColor = overdue ? "rgba(239,68,68,0.55)" : `${stageAccent}44`
+          el.style.transform = "translateY(-1px)"
+          el.style.boxShadow = overdue
+            ? "0 4px 16px rgba(239,68,68,0.1)"
+            : `0 4px 16px ${stageAccent}12`
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLDivElement
+          el.style.borderColor = overdue ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.06)"
+          el.style.transform = ""
+          el.style.boxShadow = ""
+        }}
+      >
+        {/* barra superior colorida do estágio */}
+        <div
+          className="h-[1.5px]"
+          style={{ background: overdue ? "#EF4444" : stageAccent, opacity: 0.7 }}
+        />
 
-      <div className="px-3 py-2.5 pl-4">
-        <p className="text-[13px] font-medium text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">
-          {deal.title}
-        </p>
-
-        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">
-          {leadName}
-        </p>
-
-        <p className="font-mono text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-2 tracking-tight">
-          {formatCurrency(deal.value)}
-        </p>
-
-        <div className="flex items-center justify-between mt-2">
-          {deal.deadline ? (
-            <span
-              className={cn(
-                "flex items-center gap-1 text-[11px] font-medium",
-                overdue
-                  ? "text-red-500 dark:text-red-400"
-                  : "text-slate-400 dark:text-slate-500"
-              )}
-            >
-              <CalendarDays className="h-3 w-3 shrink-0" />
-              {formatDeadline(deal.deadline)}
-              {overdue && <span className="text-red-500 dark:text-red-400">· atrasado</span>}
-            </span>
-          ) : (
-            <span />
-          )}
-
-          <div
-            className={cn(
-              "h-6 w-6 rounded-full flex items-center justify-center",
-              "text-[10px] font-bold text-white shrink-0",
-              avatarColor(ownerInitials)
-            )}
+        <div className="px-3 py-3">
+          {/* título */}
+          <p
+            className="text-[13px] font-semibold leading-snug line-clamp-2"
+            style={{
+              fontFamily: "var(--font-syne, sans-serif)",
+              color: "#E8E8E8",
+            }}
           >
-            {ownerInitials}
+            {deal.title}
+          </p>
+
+          {/* avatar + nome do lead */}
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <div
+              className="h-5 w-5 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                background: avatarBg(ownerInitials),
+                fontSize: "9px",
+                fontWeight: 700,
+                color: "#fff",
+                fontFamily: "var(--font-syne, sans-serif)",
+              }}
+            >
+              {ownerInitials}
+            </div>
+            <p
+              className="text-[11px] truncate"
+              style={{ color: "#8A8A8F" }}
+            >
+              {leadName}
+            </p>
+          </div>
+
+          {/* separador */}
+          <div
+            className="my-2"
+            style={{ height: "1px", background: "rgba(255,255,255,0.04)" }}
+          />
+
+          {/* valor + responsável + data */}
+          <div className="flex items-end justify-between gap-2">
+            <div>
+              <p
+                className="text-sm font-semibold tabular-nums tracking-tight"
+                style={{
+                  fontFamily: "var(--font-ibm-mono, monospace)",
+                  color: "#CAFF33",
+                }}
+              >
+                {formatCurrency(deal.value)}
+              </p>
+
+              {deal.deadline && (
+                <span
+                  className="flex items-center gap-1 text-[11px] font-medium mt-1"
+                  style={{ color: overdue ? "#EF4444" : "#555559" }}
+                >
+                  <CalendarDays className="h-3 w-3 shrink-0" />
+                  {formatDeadline(deal.deadline)}
+                  {overdue && (
+                    <span style={{ color: "#EF4444" }}>· Vencido</span>
+                  )}
+                </span>
+              )}
+            </div>
+
+            {/* nome do responsável uppercase */}
+            <span
+              className="text-[10px] font-semibold tracking-wider uppercase shrink-0"
+              style={{
+                color: "#555559",
+                fontFamily: "var(--font-ibm-mono, monospace)",
+              }}
+            >
+              {ownerInitials}
+            </span>
           </div>
         </div>
       </div>

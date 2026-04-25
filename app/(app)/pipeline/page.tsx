@@ -37,7 +37,8 @@ export default function PipelinePage() {
   return (
     <div className="flex flex-col h-full min-w-0">
       <KanbanBoard
-        initialDeals={deals}
+        deals={deals}
+        onDealsChange={setDeals}
         leadNames={leadNames}
         ownerInitials={ownerInitials}
         onNewDeal={() => setNewDealOpen(true)}

@@ -2,6 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { Plus } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
 import { DealCard } from "./DealCard"
 import type { Deal, DealStage } from "@/types"
@@ -9,109 +10,126 @@ import type { Deal, DealStage } from "@/types"
 interface ColumnConfig {
   label: string
   color: "default" | "won" | "lost"
+  accent: string
 }
 
 export const COLUMN_CONFIG: Record<DealStage, ColumnConfig> = {
-  new_lead:      { label: "Novo Lead",          color: "default" },
-  contacted:     { label: "Contato Realizado",   color: "default" },
-  proposal_sent: { label: "Proposta Enviada",    color: "default" },
-  negotiation:   { label: "Negociação",          color: "default" },
-  closed_won:    { label: "Fechado Ganho",       color: "won" },
-  closed_lost:   { label: "Fechado Perdido",     color: "lost" },
+  new_lead:      { label: "Novo Lead",          color: "default", accent: "#3B82F6" },
+  contacted:     { label: "Contato Realizado",   color: "default", accent: "#06B6D4" },
+  proposal_sent: { label: "Proposta Enviada",    color: "default", accent: "#F59E0B" },
+  negotiation:   { label: "Negociação",          color: "default", accent: "#F97316" },
+  closed_won:    { label: "Fechado Ganho",       color: "won",     accent: "#22C55E" },
+  closed_lost:   { label: "Fechado Perdido",     color: "lost",    accent: "#EF4444" },
 }
+
+const STAGGER_CLASS = [
+  "pf-stagger-1", "pf-stagger-2", "pf-stagger-3",
+  "pf-stagger-4", "pf-stagger-5", "pf-stagger-6",
+]
 
 interface KanbanColumnProps {
   stage: DealStage
+  staggerIndex: number
   deals: Deal[]
   leadNames: Record<string, string>
   ownerInitials: Record<string, string>
   onCardClick: (deal: Deal) => void
+  onNewDeal?: () => void
 }
 
 export function KanbanColumn({
   stage,
+  staggerIndex,
   deals,
   leadNames,
   ownerInitials,
   onCardClick,
+  onNewDeal,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
-  const { label, color } = COLUMN_CONFIG[stage]
+  const { label, accent } = COLUMN_CONFIG[stage]
   const totalValue = deals.reduce((sum, d) => sum + d.value, 0)
 
   return (
-    <div className="flex flex-col w-[272px] shrink-0 snap-start">
+    <div
+      className={cn(
+        "flex flex-col w-[300px] shrink-0 snap-start rounded-xl overflow-hidden",
+        STAGGER_CLASS[staggerIndex] ?? "pf-stagger-1"
+      )}
+      style={{
+        background: "#111113",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
       {/* cabeçalho */}
-      <div
-        className={cn(
-          "flex items-center justify-between px-3 py-2.5 rounded-t-xl",
-          "border border-b-0",
-          color === "won"
-            ? "border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30"
-            : color === "lost"
-              ? "border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30"
-              : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60"
-        )}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <span
-            className={cn(
-              "text-[13px] font-semibold leading-none truncate",
-              color === "won"
-                ? "text-emerald-800 dark:text-emerald-300"
-                : color === "lost"
-                  ? "text-red-700 dark:text-red-400"
-                  : "text-slate-700 dark:text-slate-200"
-            )}
-          >
-            {label}
-          </span>
-          <span
-            className={cn(
-              "text-[11px] font-bold rounded-full px-1.5 py-0.5 leading-none tabular-nums shrink-0",
-              color === "won"
-                ? "bg-emerald-200 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300"
-                : color === "lost"
-                  ? "bg-red-200 dark:bg-red-900/60 text-red-600 dark:text-red-400"
-                  : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300"
-            )}
-          >
-            {deals.length}
-          </span>
+      <div className="px-3 pt-3 pb-2">
+        {/* linha 1: dot + label + contador + botão + */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            {/* dot colorido */}
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ background: accent, boxShadow: `0 0 6px ${accent}88` }}
+            />
+            <span
+              className="text-[11px] font-semibold tracking-widest uppercase"
+              style={{
+                fontFamily: "var(--font-ibm-mono, monospace)",
+                color: "#8A8A8F",
+              }}
+            >
+              {label}
+            </span>
+            <span
+              className="text-[11px] font-bold tabular-nums ml-0.5"
+              style={{ color: accent }}
+            >
+              {deals.length}
+            </span>
+          </div>
+
+          {onNewDeal && (
+            <button
+              onClick={onNewDeal}
+              className="flex items-center justify-center w-5 h-5 rounded transition-colors duration-150"
+              style={{ color: "#555559" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "#CAFF33"
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = "#555559"
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
-        {totalValue > 0 && (
-          <span
-            className={cn(
-              "font-mono text-[11px] font-semibold tabular-nums shrink-0 ml-2",
-              color === "won"
-                ? "text-emerald-700 dark:text-emerald-400"
-                : color === "lost"
-                  ? "text-red-600 dark:text-red-400"
-                  : "text-slate-500 dark:text-slate-400"
-            )}
-          >
-            {formatCurrency(totalValue)}
-          </span>
-        )}
+        {/* linha 2: valor total */}
+        <p
+          className="text-xl font-bold tabular-nums tracking-tight leading-none"
+          style={{
+            fontFamily: "var(--font-syne, sans-serif)",
+            color: "#E8E8E8",
+          }}
+        >
+          {formatCurrency(totalValue)}
+        </p>
       </div>
+
+      {/* separador */}
+      <div style={{ height: "1px", background: "rgba(255,255,255,0.05)", margin: "0 12px" }} />
 
       {/* área de drop */}
       <div
         ref={setNodeRef}
         className={cn(
-          "flex flex-col gap-2 p-2 rounded-b-xl flex-1 min-h-[140px]",
-          "border border-slate-200 dark:border-slate-800",
-          "transition-colors duration-150",
-          color === "won"
-            ? "bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-900/60"
-            : color === "lost"
-              ? "bg-red-50/50 dark:bg-red-950/10 border-red-200 dark:border-red-900/60"
-              : "bg-slate-50/80 dark:bg-slate-900/30",
-          isOver && color === "default" && "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-300 dark:border-indigo-800",
-          isOver && color === "won" && "bg-emerald-100/60 dark:bg-emerald-950/30",
-          isOver && color === "lost" && "bg-red-100/60 dark:bg-red-950/30"
+          "flex flex-col gap-2 p-3 flex-1 min-h-[120px]",
+          "transition-colors duration-150"
         )}
+        style={{
+          background: isOver ? `${accent}08` : "transparent",
+        }}
       >
         <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
           {deals.map((deal) => (
@@ -120,14 +138,18 @@ export function KanbanColumn({
               deal={deal}
               leadName={leadNames[deal.lead_id] ?? "Lead desconhecido"}
               ownerInitials={deal.owner_id ? (ownerInitials[deal.owner_id] ?? "?") : "?"}
+              stageAccent={accent}
               onClick={() => onCardClick(deal)}
             />
           ))}
         </SortableContext>
 
         {deals.length === 0 && (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-[11px] text-slate-300 dark:text-slate-700 select-none">
+          <div className="flex-1 flex items-center justify-center min-h-[60px]">
+            <p
+              className="text-[11px] select-none"
+              style={{ color: "#2A2A2E" }}
+            >
               Arraste aqui
             </p>
           </div>
