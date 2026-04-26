@@ -37,9 +37,11 @@ export async function register(
   })
 
   if (error) {
-    // "user_already_exists" is the stable Supabase error code for duplicate signups
     if (error.code === "user_already_exists" || error.status === 422) {
       return { error: "Este e-mail já está cadastrado." }
+    }
+    if (error.code === "over_email_send_rate_limit") {
+      return { error: "Muitas tentativas de cadastro. Aguarde alguns minutos e tente novamente." }
     }
     return { error: "Erro ao criar conta. Tente novamente." }
   }

@@ -56,8 +56,6 @@ export default function OnboardingPage() {
       setLoadingStep1(false)
       return
     }
-    // On success, createWorkspace calls redirect("/dashboard") — step 2 is kept
-    // as a future enhancement for invite flow (M10)
     setLoadingStep1(false)
     setStep(2)
   }

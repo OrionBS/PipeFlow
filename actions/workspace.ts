@@ -36,7 +36,9 @@ export async function createWorkspace(
     return { error: "Erro ao criar workspace. Tente novamente." }
   }
 
-  redirect("/dashboard")
+  // Return null on success — let the caller decide where to redirect.
+  // Onboarding shows step 2 (invite) before navigating to dashboard.
+  return null
 }
 
 export async function getWorkspaces(): Promise<

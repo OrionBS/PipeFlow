@@ -30,7 +30,17 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
+
+  // Public routes — never redirect
+  const isPublicRoute =
+    pathname === "/" ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/invite/")
+
+  // Auth routes — redirect to dashboard if already logged in
   const isAuthRoute = ["/login", "/register"].includes(pathname)
+
+  // Protected app routes — redirect to login if not authenticated
   const isAppRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/leads") ||
@@ -38,6 +48,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/activities") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/onboarding")
+
+  if (isPublicRoute) return supabaseResponse
 
   if (!user && isAppRoute) {
     const url = request.nextUrl.clone()
