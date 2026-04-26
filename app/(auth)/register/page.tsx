@@ -52,6 +52,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [successMsg, setSuccessMsg] = useState("")
   const [loading, setLoading] = useState(false)
 
   function clearError(field: keyof FieldErrors) {
@@ -66,13 +67,17 @@ export default function RegisterPage() {
       return
     }
     setErrors({})
+    setSuccessMsg("")
     setLoading(true)
     const result = await register(name, email, password)
-    if (result?.error) {
+    if (result && "error" in result) {
       setErrors({ form: result.error })
       setLoading(false)
+    } else if (result && "success" in result) {
+      setSuccessMsg(result.success)
+      setLoading(false)
     }
-    // On success, `register` server action calls redirect() — no need to handle here
+    // On success with immediate session, `register` calls redirect() — no need to handle here
   }
 
   return (
@@ -88,6 +93,11 @@ export default function RegisterPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        {successMsg && (
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400">
+            {successMsg}
+          </div>
+        )}
         {errors.form && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {errors.form}

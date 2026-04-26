@@ -41,7 +41,7 @@ export default function LoginPage() {
     setErrors({})
     setLoading(true)
     const result = await login(email, password)
-    if (result?.error) {
+    if (result && "error" in result) {
       setErrors({ form: result.error })
       setLoading(false)
     }

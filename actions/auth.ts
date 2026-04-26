@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 
-export type AuthResult = { error: string } | null
+export type AuthResult = { error: string } | { success: string } | null
 
 export async function login(email: string, password: string): Promise<AuthResult> {
   const supabase = await createClient()
@@ -11,6 +11,9 @@ export async function login(email: string, password: string): Promise<AuthResult
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
+    if (error.code === "email_not_confirmed") {
+      return { error: "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada." }
+    }
     return { error: "E-mail ou senha incorretos." }
   }
 
@@ -24,7 +27,7 @@ export async function register(
 ): Promise<AuthResult> {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -41,7 +44,13 @@ export async function register(
     return { error: "Erro ao criar conta. Tente novamente." }
   }
 
-  redirect("/onboarding")
+  // If email confirmation is disabled in Supabase, the session is created immediately
+  // and we can redirect straight to onboarding. Otherwise, tell the user to check email.
+  if (data.session) {
+    redirect("/onboarding")
+  }
+
+  return { success: "Conta criada! Verifique seu e-mail para confirmar o cadastro antes de entrar." }
 }
 
 export async function logout(): Promise<void> {
