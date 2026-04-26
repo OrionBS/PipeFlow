@@ -1,12 +1,10 @@
 -- =============================================================================
--- 007_rls_policies.sql
--- Aplicar após todos os arquivos 001–006.
--- Pode ser re-executado: cada bloco dropa as policies antes de recriar.
+-- 007_rls_policies.sql — v2
+-- Aplicar após todos os arquivos 001–006. Idempotente (drop + recreate).
+-- v2: TO authenticated em todas as policies (anon role não avalia mais as
+--     políticas), SET search_path = '' nas funções SECURITY DEFINER
+--     (previne search-path hijack).
 -- =============================================================================
-
--- ---------------------------------------------------------------------------
--- Habilitar RLS
--- ---------------------------------------------------------------------------
 
 alter table public.workspaces        enable row level security;
 alter table public.workspace_members enable row level security;
@@ -17,8 +15,7 @@ alter table public.subscriptions     enable row level security;
 
 -- ---------------------------------------------------------------------------
 -- Função auxiliar — retorna workspace_ids do usuário autenticado.
--- security definer: roda como dono da função, ignora RLS em workspace_members,
--- o que é seguro porque só expõe os ids do próprio auth.uid().
+-- set search_path = '' força referências schema-qualified, bloqueando hijack.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.my_workspace_ids()
@@ -26,7 +23,7 @@ returns setof uuid
 language sql
 stable
 security definer
-set search_path = public
+set search_path = ''
 as $$
   select workspace_id
   from   public.workspace_members
@@ -36,8 +33,6 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- workspaces
--- Inserção via service_role (onboarding Server Action) — sem INSERT policy.
--- Bootstrap: usuário não pode ser membro antes de o workspace existir.
 -- ---------------------------------------------------------------------------
 
 drop policy if exists "workspaces: members can select" on public.workspaces;
@@ -45,11 +40,15 @@ drop policy if exists "workspaces: admins can update"  on public.workspaces;
 drop policy if exists "workspaces: admins can delete"  on public.workspaces;
 
 create policy "workspaces: members can select"
-  on public.workspaces for select
+  on public.workspaces
+  as permissive for select
+  to authenticated
   using (id in (select public.my_workspace_ids()));
 
 create policy "workspaces: admins can update"
-  on public.workspaces for update
+  on public.workspaces
+  as permissive for update
+  to authenticated
   using (
     id in (
       select workspace_id from public.workspace_members
@@ -60,7 +59,9 @@ create policy "workspaces: admins can update"
   );
 
 create policy "workspaces: admins can delete"
-  on public.workspaces for delete
+  on public.workspaces
+  as permissive for delete
+  to authenticated
   using (
     id in (
       select workspace_id from public.workspace_members
@@ -79,13 +80,18 @@ drop policy if exists "members: admins can insert"         on public.workspace_m
 drop policy if exists "members: admins can update"         on public.workspace_members;
 drop policy if exists "members: admins can delete"         on public.workspace_members;
 drop policy if exists "members: user can update own row"   on public.workspace_members;
+drop policy if exists "members: user can accept invite"    on public.workspace_members;
 
 create policy "members: active members can select"
-  on public.workspace_members for select
+  on public.workspace_members
+  as permissive for select
+  to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "members: admins can insert"
-  on public.workspace_members for insert
+  on public.workspace_members
+  as permissive for insert
+  to authenticated
   with check (
     workspace_id in (
       select workspace_id from public.workspace_members
@@ -96,7 +102,9 @@ create policy "members: admins can insert"
   );
 
 create policy "members: admins can update"
-  on public.workspace_members for update
+  on public.workspace_members
+  as permissive for update
+  to authenticated
   using (
     workspace_id in (
       select workspace_id from public.workspace_members m2
@@ -107,7 +115,9 @@ create policy "members: admins can update"
   );
 
 create policy "members: admins can delete"
-  on public.workspace_members for delete
+  on public.workspace_members
+  as permissive for delete
+  to authenticated
   using (
     workspace_id in (
       select workspace_id from public.workspace_members m2
@@ -117,13 +127,22 @@ create policy "members: admins can delete"
     )
   );
 
--- Usuário pode atualizar a própria linha (aceitar convite: muda status → 'active')
-create policy "members: user can update own row"
-  on public.workspace_members for update
-  using (user_id = auth.uid());
+-- Restringe update da própria linha: role não pode mudar (previne escalação)
+create policy "members: user can accept invite"
+  on public.workspace_members
+  as permissive for update
+  to authenticated
+  using (user_id = auth.uid())
+  with check (
+    role = (
+      select role from public.workspace_members
+      where  user_id      = auth.uid()
+      and    workspace_id = workspace_members.workspace_id
+    )
+  );
 
 -- ---------------------------------------------------------------------------
--- leads — qualquer membro ativo faz CRUD
+-- leads
 -- ---------------------------------------------------------------------------
 
 drop policy if exists "leads: members can select" on public.leads;
@@ -132,23 +151,23 @@ drop policy if exists "leads: members can update" on public.leads;
 drop policy if exists "leads: members can delete" on public.leads;
 
 create policy "leads: members can select"
-  on public.leads for select
+  on public.leads as permissive for select to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "leads: members can insert"
-  on public.leads for insert
+  on public.leads as permissive for insert to authenticated
   with check (workspace_id in (select public.my_workspace_ids()));
 
 create policy "leads: members can update"
-  on public.leads for update
+  on public.leads as permissive for update to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "leads: members can delete"
-  on public.leads for delete
+  on public.leads as permissive for delete to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 -- ---------------------------------------------------------------------------
--- deals — qualquer membro ativo faz CRUD
+-- deals
 -- ---------------------------------------------------------------------------
 
 drop policy if exists "deals: members can select" on public.deals;
@@ -157,23 +176,23 @@ drop policy if exists "deals: members can update" on public.deals;
 drop policy if exists "deals: members can delete" on public.deals;
 
 create policy "deals: members can select"
-  on public.deals for select
+  on public.deals as permissive for select to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "deals: members can insert"
-  on public.deals for insert
+  on public.deals as permissive for insert to authenticated
   with check (workspace_id in (select public.my_workspace_ids()));
 
 create policy "deals: members can update"
-  on public.deals for update
+  on public.deals as permissive for update to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "deals: members can delete"
-  on public.deals for delete
+  on public.deals as permissive for delete to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 -- ---------------------------------------------------------------------------
--- activities — membros lêem e criam; somente o autor edita/deleta
+-- activities
 -- ---------------------------------------------------------------------------
 
 drop policy if exists "activities: members can select"  on public.activities;
@@ -182,38 +201,32 @@ drop policy if exists "activities: author can update"   on public.activities;
 drop policy if exists "activities: author can delete"   on public.activities;
 
 create policy "activities: members can select"
-  on public.activities for select
+  on public.activities as permissive for select to authenticated
   using (workspace_id in (select public.my_workspace_ids()));
 
 create policy "activities: members can insert"
-  on public.activities for insert
+  on public.activities as permissive for insert to authenticated
   with check (
     workspace_id in (select public.my_workspace_ids())
     and author_id = auth.uid()
   );
 
 create policy "activities: author can update"
-  on public.activities for update
-  using (
-    workspace_id in (select public.my_workspace_ids())
-    and author_id = auth.uid()
-  );
+  on public.activities as permissive for update to authenticated
+  using (workspace_id in (select public.my_workspace_ids()) and author_id = auth.uid());
 
 create policy "activities: author can delete"
-  on public.activities for delete
-  using (
-    workspace_id in (select public.my_workspace_ids())
-    and author_id = auth.uid()
-  );
+  on public.activities as permissive for delete to authenticated
+  using (workspace_id in (select public.my_workspace_ids()) and author_id = auth.uid());
 
 -- ---------------------------------------------------------------------------
--- subscriptions — apenas admins lêem; escrita somente via service_role (webhook)
+-- subscriptions — apenas admins lêem; escrita somente via service_role
 -- ---------------------------------------------------------------------------
 
 drop policy if exists "subscriptions: admins can select" on public.subscriptions;
 
 create policy "subscriptions: admins can select"
-  on public.subscriptions for select
+  on public.subscriptions as permissive for select to authenticated
   using (
     workspace_id in (
       select workspace_id from public.workspace_members

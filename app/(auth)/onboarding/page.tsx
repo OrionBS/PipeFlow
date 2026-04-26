@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { createWorkspace } from "@/actions/workspace"
 
 function slugify(str: string): string {
   return str
@@ -24,6 +25,7 @@ export default function OnboardingPage() {
   // Step 1
   const [workspaceName, setWorkspaceName] = useState("")
   const [nameError, setNameError] = useState("")
+  const [formError, setFormError] = useState("")
   const [loadingStep1, setLoadingStep1] = useState(false)
 
   // Step 2
@@ -45,26 +47,26 @@ export default function OnboardingPage() {
       return
     }
     setNameError("")
+    setFormError("")
     setLoadingStep1(true)
-    await new Promise((r) => setTimeout(r, 600))
+
+    const result = await createWorkspace(workspaceName.trim(), slug)
+    if (result?.error) {
+      setFormError(result.error)
+      setLoadingStep1(false)
+      return
+    }
+    // On success, createWorkspace calls redirect("/dashboard") — step 2 is kept
+    // as a future enhancement for invite flow (M10)
     setLoadingStep1(false)
     setStep(2)
   }
 
   function handleAddInvite() {
     const trimmed = inviteEmail.trim()
-    if (!trimmed) {
-      setInviteError("Digite um e-mail.")
-      return
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setInviteError("E-mail inválido.")
-      return
-    }
-    if (invites.includes(trimmed)) {
-      setInviteError("E-mail já adicionado.")
-      return
-    }
+    if (!trimmed) { setInviteError("Digite um e-mail."); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) { setInviteError("E-mail inválido."); return }
+    if (invites.includes(trimmed)) { setInviteError("E-mail já adicionado."); return }
     setInvites((prev) => [...prev, trimmed])
     setInviteEmail("")
     setInviteError("")
@@ -77,7 +79,7 @@ export default function OnboardingPage() {
   async function handleStep2(e: React.FormEvent) {
     e.preventDefault()
     setLoadingStep2(true)
-    await new Promise((r) => setTimeout(r, 800))
+    // Invite flow is implemented in M10 — skip for now
     router.push("/dashboard")
   }
 
@@ -122,6 +124,12 @@ export default function OnboardingPage() {
           </div>
 
           <form className="space-y-4" onSubmit={handleStep1} noValidate>
+            {formError && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <Label htmlFor="workspace-name">Nome do workspace</Label>
               <Input
@@ -131,6 +139,7 @@ export default function OnboardingPage() {
                 onChange={(e) => {
                   setWorkspaceName(e.target.value)
                   if (nameError) setNameError("")
+                  if (formError) setFormError("")
                 }}
                 disabled={loadingStep1}
                 aria-invalid={!!nameError}
@@ -146,11 +155,7 @@ export default function OnboardingPage() {
               ) : null}
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-10"
-              disabled={loadingStep1}
-            >
+            <Button type="submit" className="w-full h-10" disabled={loadingStep1}>
               {loadingStep1 ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -194,25 +199,15 @@ export default function OnboardingPage() {
                     if (inviteError) setInviteError("")
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      handleAddInvite()
-                    }
+                    if (e.key === "Enter") { e.preventDefault(); handleAddInvite() }
                   }}
                   disabled={loadingStep2}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddInvite}
-                  disabled={loadingStep2}
-                >
+                <Button type="button" variant="outline" onClick={handleAddInvite} disabled={loadingStep2}>
                   <Plus className="size-4" />
                 </Button>
               </div>
-              {inviteError && (
-                <p className="text-xs text-destructive">{inviteError}</p>
-              )}
+              {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
             </div>
 
             {invites.length > 0 && (

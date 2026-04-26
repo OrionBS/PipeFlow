@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { login } from "@/actions/auth"
 
-type FieldErrors = { email?: string; password?: string }
+type FieldErrors = { email?: string; password?: string; form?: string }
 
 function validate(email: string, password: string): FieldErrors {
   const errors: FieldErrors = {}
@@ -26,7 +26,6 @@ function validate(email: string, password: string): FieldErrors {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -41,8 +40,12 @@ export default function LoginPage() {
     }
     setErrors({})
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    router.push("/dashboard")
+    const result = await login(email, password)
+    if (result?.error) {
+      setErrors({ form: result.error })
+      setLoading(false)
+    }
+    // On success, `login` server action calls redirect() — no need to handle here
   }
 
   return (
@@ -58,6 +61,12 @@ export default function LoginPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        {errors.form && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errors.form}
+          </div>
+        )}
+
         <div className="space-y-1.5">
           <Label htmlFor="email">E-mail</Label>
           <Input
@@ -74,9 +83,7 @@ export default function LoginPage() {
             aria-invalid={!!errors.email}
             className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -103,9 +110,7 @@ export default function LoginPage() {
             aria-invalid={!!errors.password}
             className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.password && (
-            <p className="text-xs text-destructive">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
         </div>
 
         <Button type="submit" className="w-full h-10" disabled={loading}>
@@ -119,10 +124,6 @@ export default function LoginPage() {
           )}
         </Button>
       </form>
-
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Modo demo — qualquer e-mail e senha (8+ caracteres) funcionam.
-      </p>
     </>
   )
 }
