@@ -204,6 +204,10 @@ export interface Database {
         Args:    Record<string, never>
         Returns: string[]
       }
+      create_workspace_with_admin: {
+        Args: { p_name: string; p_slug: string; p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       plan_type:           PlanType

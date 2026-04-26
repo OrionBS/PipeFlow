@@ -7,21 +7,21 @@
 
 ## Visão Geral dos Milestones
 
-| # | Nome | Branch | Fase |
-|---|---|---|---|
-| M0 | Setup & Scaffolding | `main` | Fundação |
-| M1 | Landing Page | `feat/landing-page` | UI |
-| M2 | App Shell & Auth Pages | `feat/app-shell` | UI |
-| M3 | Leads UI | `feat/leads-ui` | UI |
-| M4 | Pipeline Kanban UI | `feat/pipeline-ui` | UI |
-| M5 | Dashboard & Settings UI | `feat/dashboard-ui` | UI |
-| M6 | Auth & Banco de Dados | `feat/auth-database` | Backend |
-| M7 | Leads Backend | `feat/leads-backend` | Backend |
-| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend |
-| M9 | Dashboard Backend | `feat/dashboard-backend` | Backend |
-| M10 | Multi-workspace & Colaboração | `feat/workspaces` | Backend |
-| M11 | Monetização (Stripe) | `feat/stripe` | Backend |
-| M12 | Deploy & Produção | `feat/production` | Launch |
+| # | Nome | Branch | Fase | Status |
+|---|---|---|---|---|
+| M0 | Setup & Scaffolding | `main` | Fundação | ✅ Concluído |
+| M1 | Landing Page | `feat/landing-page` | UI | ✅ Concluído |
+| M2 | App Shell & Auth Pages | `feat/app-shell` | UI | ✅ Concluído |
+| M3 | Leads UI | `feat/leads-ui` | UI | ✅ Concluído |
+| M4 | Pipeline Kanban UI | `feat/pipeline-ui` | UI | ✅ Concluído |
+| M5 | Dashboard & Settings UI | `feat/dashboard-ui` | UI | ✅ Concluído |
+| M6 | Auth & Banco de Dados | `feat/auth-database` | Backend | ✅ Concluído |
+| M7 | Leads Backend | `feat/leads-backend` | Backend | 🔄 Próximo |
+| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend | ⏳ Pendente |
+| M9 | Dashboard Backend | `feat/dashboard-backend` | Backend | ⏳ Pendente |
+| M10 | Multi-workspace & Colaboração | `feat/workspaces` | Backend | ⏳ Pendente |
+| M11 | Monetização (Stripe) | `feat/stripe` | Backend | ⏳ Pendente |
+| M12 | Deploy & Produção | `feat/production` | Launch | ⏳ Pendente |
 
 ---
 
@@ -195,29 +195,37 @@
 - [x] Criar projeto no Supabase e preencher variáveis de ambiente
 - [x] Instalar `@supabase/supabase-js` e `@supabase/ssr`
 - [x] Criar `lib/supabase/client.ts` (browser) e `lib/supabase/server.ts` (server + cookies)
-- [x] Criar `middleware.ts` — proteger rotas `/(app)` e redirecionar para `/login`
+- [x] Criar `proxy.ts` (antes `middleware.ts`) — proteger rotas `/(app)` e redirecionar para `/login` (migrado para convenção Next.js 16)
 
 **Schema SQL**
-- [ ] Tabela `workspaces` — id, name, slug, plan, stripe_customer_id, stripe_subscription_id, created_at
-- [ ] Tabela `members` — id, workspace_id, user_id, role (`admin`|`member`), invited_email, status, created_at
-- [ ] Tabela `leads` — id, workspace_id, name, email, phone, company, role, status, owner_id, created_at
-- [ ] Tabela `deals` — id, workspace_id, lead_id, title, value, stage, owner_id, deadline, created_at
-- [ ] Tabela `activities` — id, workspace_id, lead_id, type, description, author_id, date, created_at
-- [ ] Tabela `invites` — id, workspace_id, email, token, role, expires_at, accepted_at
+- [x] Tabela `workspaces` — id, name, slug, plan, stripe_customer_id, stripe_subscription_id, created_at
+- [x] Tabela `members` — id, workspace_id, user_id, role (`admin`|`member`), invited_email, status, created_at
+- [x] Tabela `leads` — id, workspace_id, name, email, phone, company, role, status, owner_id, created_at
+- [x] Tabela `deals` — id, workspace_id, lead_id, title, value, stage, owner_id, deadline, created_at
+- [x] Tabela `activities` — id, workspace_id, lead_id, type, description, author_id, date, created_at
+- [x] Tabela `invites` — id, workspace_id, email, token, role, expires_at, accepted_at
 
 **RLS Policies**
-- [ ] Policies em todas as tabelas: acesso restrito a membros do mesmo workspace
-- [ ] Policy especial em `invites`: leitura por token público (para aceite de convite)
+- [x] Policies em todas as tabelas: acesso restrito a membros do mesmo workspace (`007_rls_policies.sql`)
+- [x] Policy especial em `invites`: leitura por token público (para aceite de convite)
+- [x] RPC `create_workspace_with_admin` — transação atômica para bootstrap do workspace (`008_create_workspace_rpc.sql`)
+- [x] Fix escalação de privilégio em membros (`009_fix_member_escalation.sql`)
+- [x] Índices trigram GIN para busca textual (`010_search_indexes.sql`)
+
+**Supabase Extras**
+- [x] Criar `lib/supabase/service.ts` — client com service role key (bypass RLS para operações de sistema)
+- [x] Criar `app/auth/callback/route.ts` — handler PKCE para email confirmation
 
 **Auth**
-- [ ] Login com e-mail/senha (Supabase Auth)
-- [ ] Registro com criação automática de perfil
-- [ ] Onboarding: criar workspace → criar membro admin → redirecionar para dashboard
-- [ ] Logout funcionando
-- [ ] Persistência de sessão via cookies (SSR)
-- [ ] Middleware protegendo todas as rotas `/(app)`
+- [x] Login com e-mail/senha (Supabase Auth) — `actions/auth.ts`
+- [x] Registro com criação automática de perfil — `actions/auth.ts`
+- [x] Onboarding: criar workspace → criar membro admin → redirecionar para dashboard — `actions/workspace.ts`
+- [x] Logout funcionando
+- [x] Persistência de sessão via cookies (SSR)
+- [x] Middleware protegendo todas as rotas `/(app)`
+- [x] Páginas de login, register e onboarding conectadas às Server Actions reais
 
-**Commit final:** `feat: Supabase auth, database schema with RLS, onboarding flow`
+**Commit final:** `feat: database schema, RLS policies, and TypeScript types (M6) (#10)` ✅
 
 ---
 
@@ -226,17 +234,39 @@
 **Branch:** `feat/leads-backend`
 **Objetivo:** Módulo de leads conectado ao Supabase — CRUD real, filtros, busca e timeline de atividades persistidas.
 
+> **Prerequisito:** ~~Renomear `middleware.ts` → `proxy.ts`~~ ✅ Feito (Next.js 16 exige export `proxy`, não `middleware`).
+
 ### Entregas
 
-- [ ] Server Actions para leads: `createLead`, `updateLead`, `deleteLead`, `getLeads`
-- [ ] Server Actions para atividades: `createActivity`, `getActivitiesByLead`
-- [ ] Substituir mock data na `LeadTable` por dados reais do Supabase
-- [ ] Filtros e busca funcionando com queries no banco (não no cliente)
-- [ ] Timeline de atividades real na página de detalhe
-- [ ] Formulário de criação/edição persistindo no banco
-- [ ] Validação de limites do plano Free (máximo 50 leads) — erro amigável ao atingir limite
-- [ ] Responsável do lead populado com membros reais do workspace
-- [ ] Loading states e error handling em todas as operações
+**Workspace context (base de tudo)**
+- [ ] Criar `lib/workspace.ts` — helper `getCurrentWorkspaceId()` que lê o cookie `pipeflow_workspace_id`
+- [ ] Criar `lib/limits.ts` — funções `canAddLead(workspaceId)` e `canAddMember(workspaceId)` que retornam `{allowed, current, limit}`
+- [ ] Criar `lib/roles.ts` — funções `isAdmin(workspaceId)` e `getMemberRole(workspaceId)` para RBAC em Server Actions
+
+**Server Actions — Leads** (`actions/leads.ts`)
+- [ ] `createLeadAction(payload)` — valida Zod, checa `canAddLead()`, insere no banco, revalida cache
+- [ ] `updateLeadAction(id, payload)` — valida, atualiza, revalida
+- [ ] `deleteLeadAction(id)` — verifica ownership no workspace, deleta
+- [ ] `getLeads(filters?)` — query com filtros de status, busca por nome/empresa (ILIKE usando índices trigram), paginação
+
+**Server Actions — Atividades** (`actions/activities.ts`)
+- [ ] `createActivityAction(leadId, payload)` — cria atividade vinculada ao lead
+- [ ] `getActivitiesByLead(leadId)` — lista cronológica de atividades
+
+**Integração UI**
+- [ ] Substituir mock data em `app/(app)/leads/page.tsx` por `getLeads()` real
+- [ ] `LeadTable` renderiza dados reais (Server Component)
+- [ ] `LeadSearch` e `LeadFilters` passam params para query no banco (URL search params)
+- [ ] `LeadForm` chama `createLeadAction` / `updateLeadAction` com loading e error states
+- [ ] Página de detalhe `app/(app)/leads/[id]/page.tsx` carrega lead + atividades reais
+- [ ] `ActivityForm` persiste via `createActivityAction`
+- [ ] Selector "Responsável" populado com membros reais do workspace
+- [ ] Barra de uso no topo da listagem: "X/50 leads usados" (visível só no plano Free)
+
+**Error handling**
+- [ ] Limite de leads atingido → toast com mensagem e link para upgrade
+- [ ] Operações proibidas para `member` (ex: deletar lead de outro) retornam erro 403 amigável
+- [ ] Loading states (skeleton) em todas as listas
 
 **Commit final:** `feat: leads backend — CRUD, activity timeline, plan limits`
 
@@ -249,15 +279,20 @@
 
 ### Entregas
 
-- [ ] Server Actions: `createDeal`, `updateDeal`, `deleteDeal`, `updateDealStage`
-- [ ] Substituir mock data no `KanbanBoard` por dados reais
-- [ ] Drag-and-drop persiste `stage` no banco via `updateDealStage`
-- [ ] Otimistic UI no drag-and-drop (atualiza UI antes de confirmar com banco)
-- [ ] Modal de criação de negócio com leads reais no seletor
-- [ ] Modal de detalhe do negócio editável
-- [ ] Lead vinculado ao deal popula nome e empresa no card
-- [ ] Indicador de prazo vencido (card com borda vermelha se `deadline < today`)
-- [ ] Loading e error states
+**Server Actions — Deals** (`actions/deals.ts`)
+- [ ] `createDealAction(payload)` — cria negócio com lead, valor, stage, owner, deadline
+- [ ] `updateDealAction(id, payload)` — edita negócio
+- [ ] `deleteDealAction(id)` — remove negócio
+- [ ] `moveDealAction(id, newStage, newPosition)` — persiste mudança de etapa + posição após drag-and-drop
+
+**Integração UI**
+- [ ] Substituir mock data no `KanbanBoard` por dados reais do Supabase
+- [ ] Drag-and-drop chama `moveDealAction` com optimistic UI (atualiza estado local antes da confirmação do banco)
+- [ ] Modal de criação com seletor de leads reais do workspace
+- [ ] Modal de detalhe do negócio editável e com botão de deletar
+- [ ] `DealCard` popula nome/empresa do lead vinculado
+- [ ] Borda vermelha no card quando `deadline < today`
+- [ ] Loading states e error handling
 
 **Commit final:** `feat: pipeline backend — deals CRUD, stage persistence, optimistic DnD`
 

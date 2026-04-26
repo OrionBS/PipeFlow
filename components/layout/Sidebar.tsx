@@ -2,19 +2,11 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  BarChart3,
-  Users,
-  KanbanSquare,
-  Activity,
-  Settings,
-  Zap,
-} from "lucide-react"
+import { BarChart3, Users, KanbanSquare, Activity, Settings, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher"
 import { UserMenu } from "./UserMenu"
-import { MOCK_CURRENT_WORKSPACE } from "@/lib/mock-data"
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: BarChart3 },
@@ -24,27 +16,32 @@ const navItems = [
   { label: "Configurações", href: "/settings", icon: Settings },
 ]
 
+interface Workspace {
+  id: string
+  name: string
+  slug: string
+  plan: string
+}
+
 interface SidebarProps {
+  workspaces: Workspace[]
+  user: { name: string; email: string }
   onNavigate?: () => void
 }
 
-export function Sidebar({ onNavigate }: SidebarProps) {
+export function Sidebar({ workspaces, user, onNavigate }: SidebarProps) {
   const pathname = usePathname()
-  const plan = MOCK_CURRENT_WORKSPACE.plan
+  const currentPlan = workspaces[0]?.plan ?? "free"
 
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border">
-      {/* Workspace switcher */}
       <div className="p-3 border-b border-sidebar-border">
-        <WorkspaceSwitcher />
+        <WorkspaceSwitcher workspaces={workspaces} />
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
         {navItems.map(({ label, href, icon: Icon }) => {
-          const isActive =
-            pathname === href || pathname.startsWith(href + "/")
-
+          const isActive = pathname === href || pathname.startsWith(href + "/")
           return (
             <Link
               key={href}
@@ -64,21 +61,18 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer: plan badge + user menu */}
       <div className="p-3 border-t border-sidebar-border space-y-1">
         <div className="flex items-center gap-2 rounded-lg px-3 py-2 bg-sidebar-accent/50">
           <Zap className="size-3.5 text-primary shrink-0" />
-          <span className="flex-1 text-xs text-sidebar-foreground/60">
-            Plano atual
-          </span>
+          <span className="flex-1 text-xs text-sidebar-foreground/60">Plano atual</span>
           <Badge
-            variant={plan === "pro" ? "default" : "secondary"}
+            variant={currentPlan === "pro" ? "default" : "secondary"}
             className="h-5 px-1.5 text-[10px]"
           >
-            {plan === "pro" ? "Pro" : "Free"}
+            {currentPlan === "pro" ? "Pro" : "Free"}
           </Badge>
         </div>
-        <UserMenu />
+        <UserMenu user={user} />
       </div>
     </div>
   )

@@ -1,18 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { register } from "@/actions/auth"
 
 type FieldErrors = {
   name?: string
   email?: string
   password?: string
   confirmPassword?: string
+  form?: string
 }
 
 function validate(
@@ -46,12 +47,12 @@ function validate(
 }
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [errors, setErrors] = useState<FieldErrors>({})
+  const [successMsg, setSuccessMsg] = useState("")
   const [loading, setLoading] = useState(false)
 
   function clearError(field: keyof FieldErrors) {
@@ -66,9 +67,17 @@ export default function RegisterPage() {
       return
     }
     setErrors({})
+    setSuccessMsg("")
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    router.push("/onboarding")
+    const result = await register(name, email, password)
+    if (result && "error" in result) {
+      setErrors({ form: result.error })
+      setLoading(false)
+    } else if (result && "success" in result) {
+      setSuccessMsg(result.success)
+      setLoading(false)
+    }
+    // On success with immediate session, `register` calls redirect() — no need to handle here
   }
 
   return (
@@ -84,6 +93,17 @@ export default function RegisterPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+        {successMsg && (
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400">
+            {successMsg}
+          </div>
+        )}
+        {errors.form && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errors.form}
+          </div>
+        )}
+
         <div className="space-y-1.5">
           <Label htmlFor="name">Nome completo</Label>
           <Input
@@ -96,9 +116,7 @@ export default function RegisterPage() {
             aria-invalid={!!errors.name}
             className={errors.name ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -114,9 +132,7 @@ export default function RegisterPage() {
             aria-invalid={!!errors.email}
             className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -132,9 +148,7 @@ export default function RegisterPage() {
             aria-invalid={!!errors.password}
             className={errors.password ? "border-destructive focus-visible:ring-destructive" : ""}
           />
-          {errors.password && (
-            <p className="text-xs text-destructive">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
         </div>
 
         <div className="space-y-1.5">
