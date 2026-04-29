@@ -5,7 +5,7 @@ import type { LeadStatus } from "@/types"
 const STATUS_CONFIG: Record<LeadStatus, { label: string; className: string }> = {
   new: {
     label: "Novo",
-    className: "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400",
+    className: "bg-[#C8FF00]/15 text-[#C8FF00] hover:bg-[#C8FF00]/15 border-[#C8FF00]/20",
   },
   contacted: {
     label: "Contatado",
