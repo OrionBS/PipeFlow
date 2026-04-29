@@ -8,12 +8,7 @@ import {
   CreditCard,
   CheckCircle,
   ArrowRight,
-  UserPlus,
-  FileUp,
-  TrendingUp,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 import Navbar from "@/components/landing/Navbar"
 import Footer from "@/components/landing/Footer"
 
@@ -21,7 +16,7 @@ const features = [
   {
     icon: KanbanSquare,
     title: "Pipeline Kanban",
-    description: "Visualize e mova negócios entre etapas com drag & drop. Veja o funil completo de vendas em um relance.",
+    description: "Visualize e mova negócios entre etapas com drag & drop. Veja o funil completo em um relance.",
   },
   {
     icon: Users,
@@ -50,25 +45,12 @@ const features = [
   },
 ]
 
-const steps = [
-  {
-    number: "01",
-    icon: UserPlus,
-    title: "Crie sua conta grátis",
-    description: "Cadastro em 30 segundos. Sem cartão de crédito, sem burocracia.",
-  },
-  {
-    number: "02",
-    icon: FileUp,
-    title: "Adicione seus leads",
-    description: "Importe sua lista de contatos ou adicione manualmente. Configure seu pipeline.",
-  },
-  {
-    number: "03",
-    icon: TrendingUp,
-    title: "Feche mais negócios",
-    description: "Acompanhe cada oportunidade, registre atividades e tome decisões com dados.",
-  },
+const pipelineRows = [
+  { label: "NOVO",       color: "#3B82F6", width: "72%", value: "R$ 32k", count: 12 },
+  { label: "CONTATO",    color: "#06B6D4", width: "60%", value: "R$ 24k", count: 9  },
+  { label: "PROPOSTA",   color: "#A3E635", width: "48%", value: "R$ 18k", count: 6  },
+  { label: "NEGOCIAÇÃO", color: "#F97316", width: "36%", value: "R$ 12k", count: 3  },
+  { label: "FECHADO ✓",  color: "#22C55E", width: "64%", value: "R$ 45k", count: 9  },
 ]
 
 const freePlanFeatures = [
@@ -91,78 +73,122 @@ const proPlanFeatures = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-full">
+    <div className="flex flex-col min-h-full bg-black text-white">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-background">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
-        </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary font-medium mb-8">
-            <span>Novo: planos a partir de R$0/mês</span>
-            <ArrowRight className="size-3.5" />
+      <section className="relative overflow-hidden bg-black">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-24 pb-28 lg:pt-32 lg:pb-36">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-white/70 uppercase mb-8">
+                <span className="size-1.5 rounded-full bg-[#C8FF00]" />
+                CRM DE VENDAS MULTI-EMPRESA
+              </div>
+
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black leading-none tracking-tight mb-2">
+                <span className="text-white">Vendas em</span>
+                <br />
+                <span className="text-[#C8FF00]">fluxo</span>
+                <br />
+                <span className="text-[#C8FF00]">contínuo</span>
+              </h1>
+
+              <div className="w-8 h-1 bg-white/40 mt-4 mb-8" />
+
+              <p className="text-white/60 text-lg leading-relaxed max-w-md mb-10">
+                Gerencie leads, negócios e equipe num CRM que respeita a velocidade do seu time. Pipeline visual. Multi-empresa. Sem fricção.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Link
+                  href="/register"
+                  className="rounded-md bg-[#C8FF00] px-6 py-3 text-sm font-bold text-black hover:bg-[#b8ef00] transition-colors inline-flex items-center gap-2"
+                >
+                  Começar grátis
+                  <ArrowRight className="size-4" />
+                </Link>
+                <Link
+                  href="#funcionalidades"
+                  className="rounded-md border border-white/20 px-6 py-3 text-sm font-medium text-white/80 hover:border-white/40 hover:text-white transition-colors"
+                >
+                  Ver funcionalidades
+                </Link>
+              </div>
+
+              <p className="mt-5 text-sm text-white/30">
+                — Sem cartão de crédito · Plano grátis para sempre
+              </p>
+            </div>
+
+            <div className="relative">
+              <div className="rounded-xl bg-[#111111] border border-white/10 overflow-hidden shadow-2xl shadow-black/60">
+                <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/8 bg-[#0A0A0A]">
+                  <span className="size-3 rounded-full bg-[#FF5F57]" />
+                  <span className="size-3 rounded-full bg-[#FFBD2E]" />
+                  <span className="size-3 rounded-full bg-[#28CA41]" />
+                  <span className="ml-3 text-xs text-white/30 font-mono tracking-wide">
+                    pipeline — workspace: acme-corp
+                  </span>
+                </div>
+
+                <div className="px-6 py-6 space-y-4">
+                  {pipelineRows.map((row) => (
+                    <div key={row.label} className="flex items-center gap-4">
+                      <span className="w-24 text-[10px] font-semibold tracking-widest text-white/40 shrink-0">
+                        {row.label}
+                      </span>
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: row.width, backgroundColor: row.color }}
+                        />
+                      </div>
+                      <span className="w-14 text-xs text-white/60 text-right font-mono shrink-0">
+                        {row.value}
+                      </span>
+                      <span className="w-5 text-xs text-white/30 text-right font-mono shrink-0">
+                        {row.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between px-6 py-4 border-t border-white/8 bg-[#0A0A0A]">
+                  <span className="text-[10px] font-mono text-white/30 tracking-widest">total pipeline</span>
+                  <span className="text-sm font-bold text-[#C8FF00] font-mono">R$ 131.000</span>
+                </div>
+              </div>
+
+              <div className="absolute -inset-4 -z-10 bg-[#C8FF00]/5 blur-3xl rounded-full" />
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground leading-tight max-w-3xl mx-auto">
-            Feche mais negócios.{" "}
-            <span className="text-primary">Sem complicação.</span>
-          </h1>
-          <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-8">
-            PipeFlow é o CRM visual que sua equipe vai realmente usar. Pipeline Kanban,
-            gestão de leads e métricas em tempo real — tudo em um lugar simples e acessível.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className={cn(
-                buttonVariants({ variant: "default" }),
-                "h-12 px-8 text-base rounded-xl"
-              )}
-            >
-              Começar grátis
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-            <Link
-              href="#como-funciona"
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "h-12 px-8 text-base rounded-xl"
-              )}
-            >
-              Ver como funciona
-            </Link>
-          </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Sem cartão de crédito · Setup em 2 minutos · Cancele quando quiser
-          </p>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="funcionalidades" className="py-20 sm:py-28 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+      <section id="funcionalidades" className="py-24 bg-[#0A0A0A]">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-16">
+            <p className="text-[#C8FF00] text-xs font-semibold tracking-widest uppercase mb-3">Funcionalidades</p>
+            <h2 className="text-4xl sm:text-5xl font-black text-white">
               Tudo que sua equipe precisa
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="mt-4 text-lg text-white/50 max-w-xl">
               Ferramentas poderosas sem a complexidade dos CRMs tradicionais.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
                 <div
                   key={feature.title}
-                  className="rounded-xl border border-border bg-background p-6 hover:border-primary/40 hover:shadow-sm transition-all"
+                  className="rounded-xl border border-white/8 bg-[#111111] p-6 hover:border-[#C8FF00]/30 transition-colors"
                 >
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 mb-4">
-                    <Icon className="size-5 text-primary" />
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-[#C8FF00]/10 mb-4">
+                    <Icon className="size-5 text-[#C8FF00]" />
                   </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-6">{feature.description}</p>
+                  <h3 className="text-base font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-sm text-white/45 leading-6">{feature.description}</p>
                 </div>
               )
             })}
@@ -170,139 +196,90 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="como-funciona" className="py-20 sm:py-28 bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Simples de começar
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Do cadastro ao primeiro negócio fechado em menos de 5 minutos.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-border" />
-            {steps.map((step) => {
-              const Icon = step.icon
-              return (
-                <div key={step.number} className="relative text-center flex flex-col items-center">
-                  <div className="relative mb-6">
-                    <div className="flex size-20 items-center justify-center rounded-2xl border-2 border-primary/20 bg-primary/5">
-                      <Icon className="size-8 text-primary" />
-                    </div>
-                    <span className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                      {step.number.replace("0", "")}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-6 max-w-xs">{step.description}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="precos" className="py-20 sm:py-28 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+      <section id="planos" className="py-24 bg-black">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mb-16">
+            <p className="text-[#C8FF00] text-xs font-semibold tracking-widest uppercase mb-3">Planos</p>
+            <h2 className="text-4xl sm:text-5xl font-black text-white">
               Preços transparentes
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="mt-4 text-lg text-white/50">
               Comece de graça. Faça upgrade quando sua equipe crescer.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free */}
-            <div className="rounded-2xl border border-border bg-background p-8 flex flex-col">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-foreground">Free</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-foreground">R$0</span>
-                  <span className="text-muted-foreground">/mês</span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">Para freelancers e times pequenos começando.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+            <div className="rounded-2xl border border-white/10 bg-[#111111] p-8 flex flex-col">
+              <h3 className="text-sm font-semibold text-white/50 uppercase tracking-widest mb-4">Free</h3>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-5xl font-black text-white">R$0</span>
+                <span className="text-white/40">/mês</span>
               </div>
+              <p className="text-sm text-white/40 mb-8">Para freelancers e times pequenos.</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {freePlanFeatures.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle className="size-4 text-green-500 shrink-0" />
-                    {feature}
+                {freePlanFeatures.map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle className="size-4 text-[#C8FF00] shrink-0" />
+                    {f}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/register"
-                className={cn(buttonVariants({ variant: "outline" }), "w-full h-11 justify-center text-sm")}
+                className="block text-center rounded-md border border-white/20 py-3 text-sm font-semibold text-white hover:border-[#C8FF00]/40 hover:text-[#C8FF00] transition-colors"
               >
                 Criar conta grátis
               </Link>
             </div>
 
-            {/* Pro */}
-            <div className="rounded-2xl border-2 border-primary bg-background p-8 flex flex-col relative shadow-lg shadow-primary/10">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+            <div className="rounded-2xl border border-[#C8FF00]/40 bg-[#111111] p-8 flex flex-col relative">
+              <div className="absolute -top-3 left-6">
+                <span className="rounded-full bg-[#C8FF00] px-3 py-1 text-xs font-bold text-black">
                   Mais popular
                 </span>
               </div>
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-foreground">Pro</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-foreground">R$49</span>
-                  <span className="text-muted-foreground">/mês</span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">Para times em crescimento que precisam de mais.</p>
+              <h3 className="text-sm font-semibold text-[#C8FF00] uppercase tracking-widest mb-4">Pro</h3>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-5xl font-black text-white">R$49</span>
+                <span className="text-white/40">/mês</span>
               </div>
+              <p className="text-sm text-white/40 mb-8">Para times em crescimento.</p>
               <ul className="space-y-3 mb-8 flex-1">
-                {proPlanFeatures.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle className="size-4 text-primary shrink-0" />
-                    {feature}
+                {proPlanFeatures.map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-sm text-white/70">
+                    <CheckCircle className="size-4 text-[#C8FF00] shrink-0" />
+                    {f}
                   </li>
                 ))}
               </ul>
               <Link
                 href="/register"
-                className={cn(buttonVariants({ variant: "default" }), "w-full h-11 justify-center text-sm")}
+                className="block text-center rounded-md bg-[#C8FF00] py-3 text-sm font-bold text-black hover:bg-[#b8ef00] transition-colors"
               >
                 Começar com Pro
-                <ArrowRight className="ml-2 size-4" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 sm:py-28 bg-background">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="rounded-3xl bg-primary/5 border border-primary/20 px-8 py-16 sm:px-16">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Pronto para transformar suas vendas?
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-              Junte-se a times de vendas que usam PipeFlow para fechar mais negócios todos os dias.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className={cn(
-                  buttonVariants({ variant: "default" }),
-                  "h-12 px-8 text-base rounded-xl"
-                )}
-              >
-                Criar conta grátis
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Sem cartão de crédito · Cancele quando quiser
-            </p>
-          </div>
+      <section className="py-24 bg-[#0A0A0A]">
+        <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+          <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+            Pronto para transformar<br />suas vendas?
+          </h2>
+          <p className="text-lg text-white/50 max-w-xl mx-auto mb-10">
+            Junte-se a times de vendas que usam PipeFlow para fechar mais negócios todos os dias.
+          </p>
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 rounded-md bg-[#C8FF00] px-8 py-4 text-base font-bold text-black hover:bg-[#b8ef00] transition-colors"
+          >
+            Criar conta grátis
+            <ArrowRight className="size-5" />
+          </Link>
+          <p className="mt-5 text-sm text-white/30">
+            — Sem cartão de crédito · Plano grátis para sempre
+          </p>
         </div>
       </section>
 

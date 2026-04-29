@@ -100,7 +100,10 @@ export default function LeadsPage() {
             {leads.length} {leads.length === 1 ? "lead cadastrado" : "leads cadastrados"}
           </p>
         </div>
-        <Button onClick={handleNewLead} className="shrink-0">
+        <Button
+          onClick={handleNewLead}
+          className="shrink-0 bg-[#C8FF00] text-black hover:bg-[#b8ef00] font-semibold"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Novo lead
         </Button>
