@@ -12,11 +12,11 @@ const leadNames: Record<string, string> = Object.fromEntries(
 )
 
 const ownerInitials: Record<string, string> = Object.fromEntries(
-  MOCK_MEMBERS.map((m) => [m.user_id ?? m.id, m.initials])
+  MOCK_MEMBERS.filter((m) => m.user_id !== null).map((m) => [m.user_id, m.initials])
 )
 
 const ownerNames: Record<string, string> = Object.fromEntries(
-  MOCK_MEMBERS.map((m) => [m.user_id ?? m.id, m.name])
+  MOCK_MEMBERS.filter((m) => m.user_id !== null).map((m) => [m.user_id, m.name])
 )
 
 export default function PipelinePage() {
