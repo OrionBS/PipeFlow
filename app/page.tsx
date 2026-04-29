@@ -76,11 +76,9 @@ export default function Home() {
     <div className="flex flex-col min-h-full bg-black text-white">
       <Navbar />
 
-      {/* Hero */}
       <section className="relative overflow-hidden bg-black">
         <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-24 pb-28 lg:pt-32 lg:pb-36">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left */}
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-white/70 uppercase mb-8">
                 <span className="size-1.5 rounded-full bg-[#C8FF00]" />
@@ -122,10 +120,8 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Right — Mock pipeline UI */}
             <div className="relative">
               <div className="rounded-xl bg-[#111111] border border-white/10 overflow-hidden shadow-2xl shadow-black/60">
-                {/* Terminal header */}
                 <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/8 bg-[#0A0A0A]">
                   <span className="size-3 rounded-full bg-[#FF5F57]" />
                   <span className="size-3 rounded-full bg-[#FFBD2E]" />
@@ -135,7 +131,6 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* Pipeline rows */}
                 <div className="px-6 py-6 space-y-4">
                   {pipelineRows.map((row) => (
                     <div key={row.label} className="flex items-center gap-4">
@@ -158,21 +153,18 @@ export default function Home() {
                   ))}
                 </div>
 
-                {/* Footer total */}
                 <div className="flex items-center justify-between px-6 py-4 border-t border-white/8 bg-[#0A0A0A]">
                   <span className="text-[10px] font-mono text-white/30 tracking-widest">total pipeline</span>
                   <span className="text-sm font-bold text-[#C8FF00] font-mono">R$ 131.000</span>
                 </div>
               </div>
 
-              {/* Glow effect */}
               <div className="absolute -inset-4 -z-10 bg-[#C8FF00]/5 blur-3xl rounded-full" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
       <section id="funcionalidades" className="py-24 bg-[#0A0A0A]">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16">
@@ -204,7 +196,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
       <section id="planos" className="py-24 bg-black">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16">
@@ -217,7 +208,6 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-            {/* Free */}
             <div className="rounded-2xl border border-white/10 bg-[#111111] p-8 flex flex-col">
               <h3 className="text-sm font-semibold text-white/50 uppercase tracking-widest mb-4">Free</h3>
               <div className="flex items-baseline gap-1 mb-2">
@@ -241,7 +231,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Pro */}
             <div className="rounded-2xl border border-[#C8FF00]/40 bg-[#111111] p-8 flex flex-col relative">
               <div className="absolute -top-3 left-6">
                 <span className="rounded-full bg-[#C8FF00] px-3 py-1 text-xs font-bold text-black">
@@ -273,7 +262,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
       <section className="py-24 bg-[#0A0A0A]">
         <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
           <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
