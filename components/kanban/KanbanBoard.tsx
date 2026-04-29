@@ -10,7 +10,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  pointerWithin,
+  rectIntersection,
+  CollisionDetection,
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import { Plus, Search, TrendingUp, AlertCircle } from "lucide-react"
@@ -23,6 +25,14 @@ import type { Deal, DealStage } from "@/types"
 
 const STAGES = Object.keys(COLUMN_CONFIG) as DealStage[]
 const ACTIVE_STAGES: DealStage[] = ["new_lead", "contacted", "proposal_sent", "negotiation"]
+
+// pointerWithin uses the actual pointer position (not overlay corners) to detect columns,
+// preventing cards from jumping to adjacent columns the moment drag starts.
+const kanbanCollision: CollisionDetection = (args) => {
+  const pointer = pointerWithin(args)
+  if (pointer.length > 0) return pointer
+  return rectIntersection(args)
+}
 
 interface KanbanBoardProps {
   deals: Deal[]
@@ -44,6 +54,7 @@ export function KanbanBoard({
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
   const [search, setSearch] = useState("")
   const didDragRef = useRef(false)
+  const originalDealsRef = useRef<Deal[]>(deals)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -82,8 +93,15 @@ export function KanbanBoard({
 
   function handleDragStart({ active }: DragStartEvent) {
     didDragRef.current = true
+    originalDealsRef.current = deals
     const found = deals.find((d) => d.id === active.id)
     setActiveDeal(found ?? null)
+  }
+
+  function handleDragCancel() {
+    setActiveDeal(null)
+    setDeals(originalDealsRef.current)
+    setTimeout(() => { didDragRef.current = false }, 0)
   }
 
   function handleDragOver({ active, over }: DragOverEvent) {
@@ -105,7 +123,10 @@ export function KanbanBoard({
   function handleDragEnd({ active, over }: DragEndEvent) {
     setActiveDeal(null)
     setTimeout(() => { didDragRef.current = false }, 0)
-    if (!over) return
+    if (!over) {
+      setDeals(originalDealsRef.current)
+      return
+    }
     const activeId = active.id as string
     const overId = over.id as string
     const overIsStage = STAGES.includes(overId as DealStage)
@@ -119,7 +140,20 @@ export function KanbanBoard({
   }
 
   return (
-    <div className="flex flex-col h-full pf-page-enter">
+    // DndContext must live outside pf-page-enter: pf-fade-up applies transform during animation
+    // which makes position:fixed inside it viewport-relative to this div, not the viewport.
+    // DragOverlay uses position:fixed — keeping it outside any transformed ancestor fixes the offset.
+    <div className="flex flex-col h-full">
+      <DndContext
+        id="kanban-dnd"
+        sensors={sensors}
+        collisionDetection={kanbanCollision}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+      <div className="flex flex-col h-full pf-page-enter">
       {/* toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 min-w-0">
@@ -227,14 +261,6 @@ export function KanbanBoard({
         </div>
       </div>
 
-      <DndContext
-        id="kanban-dnd"
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
         <div
           className={cn(
             "flex gap-3 overflow-x-auto pb-4 flex-1 items-start min-w-0 scroll-smooth",
@@ -261,6 +287,7 @@ export function KanbanBoard({
             />
           ))}
         </div>
+      </div>{/* end pf-page-enter */}
 
         <DragOverlay dropAnimation={null}>
           {activeDeal ? (

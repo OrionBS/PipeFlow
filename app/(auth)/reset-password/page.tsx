@@ -87,7 +87,17 @@ export default function ResetPasswordPage() {
           {errors.confirm && <p className="text-xs text-destructive">{errors.confirm}</p>}
         </div>
 
-        <Button type="submit" className="w-full h-10" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full h-10 font-bold transition-all duration-200"
+          disabled={loading}
+          style={{
+            background: loading ? "rgba(202,255,51,0.5)" : "#CAFF33",
+            color: "#0C0C0E",
+            border: "none",
+            fontFamily: "var(--font-syne, sans-serif)",
+          }}
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" />
