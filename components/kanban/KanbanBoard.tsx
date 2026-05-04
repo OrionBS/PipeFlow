@@ -41,6 +41,7 @@ interface KanbanBoardProps {
   ownerInitials: Record<string, string>
   onNewDeal: () => void
   onDealClick: (deal: Deal) => void
+  onMoveDeal: (id: string, newStage: DealStage) => void
 }
 
 export function KanbanBoard({
@@ -50,11 +51,14 @@ export function KanbanBoard({
   ownerInitials,
   onNewDeal,
   onDealClick,
+  onMoveDeal,
 }: KanbanBoardProps) {
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
   const [search, setSearch] = useState("")
   const didDragRef = useRef(false)
   const originalDealsRef = useRef<Deal[]>(deals)
+  // Tracks the last stage change during drag (vs original stage) for persistence
+  const pendingStageChangeRef = useRef<{ id: string; stage: DealStage } | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -94,11 +98,13 @@ export function KanbanBoard({
   function handleDragStart({ active }: DragStartEvent) {
     didDragRef.current = true
     originalDealsRef.current = deals
+    pendingStageChangeRef.current = null
     const found = deals.find((d) => d.id === active.id)
     setActiveDeal(found ?? null)
   }
 
   function handleDragCancel() {
+    pendingStageChangeRef.current = null
     setActiveDeal(null)
     setDeals(originalDealsRef.current)
     setTimeout(() => { didDragRef.current = false }, 0)
@@ -113,6 +119,15 @@ export function KanbanBoard({
       ? (overId as DealStage)
       : (deals.find((d) => d.id === overId)?.stage ?? null)
     if (!targetStage) return
+
+    // Track whether stage changed relative to pre-drag state (for DB persistence)
+    const originalStage = originalDealsRef.current.find((d) => d.id === activeId)?.stage
+    if (targetStage !== originalStage) {
+      pendingStageChangeRef.current = { id: activeId, stage: targetStage }
+    } else {
+      pendingStageChangeRef.current = null
+    }
+
     setDeals((prev) =>
       prev.map((d) =>
         d.id === activeId && d.stage !== targetStage ? { ...d, stage: targetStage } : d
@@ -122,21 +137,31 @@ export function KanbanBoard({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     setActiveDeal(null)
+    const pendingMove = pendingStageChangeRef.current
+    pendingStageChangeRef.current = null
     setTimeout(() => { didDragRef.current = false }, 0)
+
     if (!over) {
       setDeals(originalDealsRef.current)
       return
     }
+
     const activeId = active.id as string
     const overId = over.id as string
     const overIsStage = STAGES.includes(overId as DealStage)
-    if (overIsStage) return
-    setDeals((prev) => {
-      const activeIndex = prev.findIndex((d) => d.id === activeId)
-      const overIndex = prev.findIndex((d) => d.id === overId)
-      if (activeIndex === -1 || overIndex === -1) return prev
-      return arrayMove(prev, activeIndex, overIndex)
-    })
+
+    if (!overIsStage) {
+      setDeals((prev) => {
+        const activeIndex = prev.findIndex((d) => d.id === activeId)
+        const overIndex = prev.findIndex((d) => d.id === overId)
+        if (activeIndex === -1 || overIndex === -1) return prev
+        return arrayMove(prev, activeIndex, overIndex)
+      })
+    }
+
+    if (pendingMove) {
+      onMoveDeal(pendingMove.id, pendingMove.stage)
+    }
   }
 
   return (

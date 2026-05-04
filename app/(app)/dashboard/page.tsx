@@ -1,66 +1,27 @@
-"use client"
-
-import { useState } from "react"
+import { Suspense } from "react"
 import { Users, TrendingUp, DollarSign, Target } from "lucide-react"
 import { MetricCard } from "@/components/dashboard/MetricCard"
 import { FunnelChart } from "@/components/dashboard/FunnelChart"
 import { DealsDeadlineList } from "@/components/dashboard/DealsDeadlineList"
-import { MOCK_DEALS, MOCK_LEADS } from "@/lib/mock-data"
+import { PeriodFilter } from "@/components/dashboard/PeriodFilter"
+import { getDashboardMetrics } from "@/actions/dashboard"
 import { formatCurrency } from "@/lib/utils"
-import { COLUMN_CONFIG } from "@/components/kanban/KanbanColumn"
-import type { DealStage } from "@/types"
-import { cn } from "@/lib/utils"
 
-const PERIODS = ["7d", "30d", "90d"] as const
-type Period = typeof PERIODS[number]
-
-const ACTIVE_STAGES: DealStage[] = ["new_lead", "contacted", "proposal_sent", "negotiation"]
-
-function computeMetrics() {
-  const totalLeads = MOCK_LEADS.length
-  const openDeals = MOCK_DEALS.filter((d) => ACTIVE_STAGES.includes(d.stage))
-  const pipelineValue = openDeals.reduce((s, d) => s + d.value, 0)
-  const closedWon = MOCK_DEALS.filter((d) => d.stage === "closed_won").length
-  const totalDeals = MOCK_DEALS.length
-  const conversionRate = totalDeals > 0 ? Math.round((closedWon / totalDeals) * 100) : 0
-  return { totalLeads, openDealsCount: openDeals.length, pipelineValue, conversionRate }
+interface Props {
+  searchParams: Promise<{ period?: string }>
 }
 
-function computeFunnelData() {
-  return (Object.entries(COLUMN_CONFIG) as [DealStage, { label: string; accent: string }][]).map(
-    ([stage, { label, accent }]) => ({
-      label,
-      count: MOCK_DEALS.filter((d) => d.stage === stage).length,
-      value: MOCK_DEALS.filter((d) => d.stage === stage).reduce((s, d) => s + d.value, 0),
-      accent,
-    })
-  )
-}
+export default async function DashboardPage({ searchParams }: Props) {
+  const { period = "30d" } = await searchParams
 
-function computeDeadlineDeals() {
-  const now = Date.now()
-  const sevenDays = now + 7 * 24 * 60 * 60 * 1000
-  return MOCK_DEALS.filter(
-    (d) => d.deadline && ACTIVE_STAGES.includes(d.stage) && new Date(d.deadline).getTime() <= sevenDays
-  )
-    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-    .map((d) => ({
-      id: d.id,
-      title: d.title,
-      leadName: MOCK_LEADS.find((l) => l.id === d.lead_id)?.name ?? "—",
-      value: d.value,
-      deadline: d.deadline!,
-      stageLabel: COLUMN_CONFIG[d.stage].label,
-      stageAccent: COLUMN_CONFIG[d.stage].accent,
-    }))
-}
-
-export default function DashboardPage() {
-  const [period, setPeriod] = useState<Period>("30d")
-
-  const { totalLeads, openDealsCount, pipelineValue, conversionRate } = computeMetrics()
-  const funnelData = computeFunnelData()
-  const deadlineDeals = computeDeadlineDeals()
+  const {
+    totalLeads,
+    openDealsCount,
+    pipelineValue,
+    conversionRate,
+    funnelData,
+    deadlineDeals,
+  } = await getDashboardMetrics(period)
 
   return (
     <div className="flex flex-col gap-6 pf-page-enter">
@@ -78,28 +39,9 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* period filter */}
-        <div
-          className="flex items-center gap-1 p-1 rounded-lg"
-          style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          {PERIODS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPeriod(p)}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-md transition-all duration-150"
-              style={{
-                fontFamily: "var(--font-ibm-mono, monospace)",
-                background: period === p ? "rgba(202,255,51,0.12)" : "transparent",
-                color: period === p ? "#CAFF33" : "#555559",
-                border: period === p ? "1px solid rgba(202,255,51,0.25)" : "1px solid transparent",
-              }}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+        <Suspense fallback={null}>
+          <PeriodFilter period={period} />
+        </Suspense>
       </div>
 
       {/* metric cards */}
@@ -107,7 +49,7 @@ export default function DashboardPage() {
         <MetricCard
           title="Total de Leads"
           value={String(totalLeads)}
-          change="12% vs mês anterior"
+          change={`Últimos ${period}`}
           changePositive
           icon={Users}
           accent="#3B82F6"
@@ -116,7 +58,7 @@ export default function DashboardPage() {
         <MetricCard
           title="Negócios Abertos"
           value={String(openDealsCount)}
-          change="2 novos esta semana"
+          change="Em andamento"
           changePositive
           icon={TrendingUp}
           accent="#06B6D4"
@@ -125,7 +67,7 @@ export default function DashboardPage() {
         <MetricCard
           title="Valor do Pipeline"
           value={formatCurrency(pipelineValue)}
-          change="R$ 3.200 vs mês anterior"
+          change="Negócios ativos"
           changePositive
           icon={DollarSign}
           accent="#CAFF33"
@@ -134,8 +76,8 @@ export default function DashboardPage() {
         <MetricCard
           title="Taxa de Conversão"
           value={`${conversionRate}%`}
-          change="5% vs mês anterior"
-          changePositive
+          change="Ganhos / Total"
+          changePositive={conversionRate > 0}
           icon={Target}
           accent="#22C55E"
           staggerIndex={3}
