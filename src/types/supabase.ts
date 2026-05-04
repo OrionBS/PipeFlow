@@ -84,7 +84,19 @@ export interface ActivityRow {
   type: ActivityType
   description: string
   author_id: string
-  occurred_at: string
+  date: string
+  created_at: string
+}
+
+export interface InviteRow {
+  id: string
+  workspace_id: string
+  email: string
+  token: string
+  role: WorkspaceRole
+  invited_by: string | null
+  expires_at: string
+  accepted_at: string | null
   created_at: string
 }
 
@@ -140,7 +152,20 @@ export type DealInsert = Omit<DealRow, 'id' | 'created_at' | 'updated_at'> & {
   deadline?: string | null
 }
 
-export type ActivityInsert = Omit<ActivityRow, 'id' | 'created_at'>
+export type ActivityInsert = Omit<ActivityRow, 'id' | 'created_at'> & {
+  date?: string
+}
+
+export type InviteInsert = Omit<InviteRow, 'id' | 'created_at'> & {
+  id?: string
+  token?: string
+  role?: WorkspaceRole
+  invited_by?: string | null
+  expires_at?: string
+  accepted_at?: string | null
+}
+
+export type InviteUpdate = Partial<Omit<InviteRow, 'id' | 'created_at' | 'workspace_id'>>
 
 export type SubscriptionInsert = Omit<SubscriptionRow, 'id' | 'created_at' | 'updated_at'> & {
   id?: string
@@ -162,61 +187,64 @@ export type SubscriptionUpdate    = Partial<Omit<SubscriptionRow,    'id' | 'cre
 
 // ---------------------------------------------------------------------------
 // Database — tipo raiz para createClient<Database>()
-// Relationships[] é exigido pelo @supabase/supabase-js v2.x para resolução
-// de tipos nos builders de query.
 // ---------------------------------------------------------------------------
 
 export interface Database {
   public: {
     Tables: {
       workspaces: {
-        Row:           WorkspaceRow
-        Insert:        WorkspaceInsert
-        Update:        WorkspaceUpdate
-        Relationships: []
+        Row:    WorkspaceRow
+        Insert: WorkspaceInsert
+        Update: WorkspaceUpdate
       }
       workspace_members: {
-        Row:           WorkspaceMemberRow
-        Insert:        WorkspaceMemberInsert
-        Update:        WorkspaceMemberUpdate
-        Relationships: []
+        Row:    WorkspaceMemberRow
+        Insert: WorkspaceMemberInsert
+        Update: WorkspaceMemberUpdate
       }
       leads: {
-        Row:           LeadRow
-        Insert:        LeadInsert
-        Update:        LeadUpdate
-        Relationships: []
+        Row:    LeadRow
+        Insert: LeadInsert
+        Update: LeadUpdate
       }
       deals: {
-        Row:           DealRow
-        Insert:        DealInsert
-        Update:        DealUpdate
-        Relationships: []
+        Row:    DealRow
+        Insert: DealInsert
+        Update: DealUpdate
       }
       activities: {
-        Row:           ActivityRow
-        Insert:        ActivityInsert
-        Update:        ActivityUpdate
-        Relationships: []
+        Row:    ActivityRow
+        Insert: ActivityInsert
+        Update: ActivityUpdate
       }
       subscriptions: {
-        Row:           SubscriptionRow
-        Insert:        SubscriptionInsert
-        Update:        SubscriptionUpdate
-        Relationships: []
+        Row:    SubscriptionRow
+        Insert: SubscriptionInsert
+        Update: SubscriptionUpdate
+      }
+      invites: {
+        Row:    InviteRow
+        Insert: InviteInsert
+        Update: InviteUpdate
       }
     }
-    Views: {
-      [_ in never]: never
-    }
+    Views: Record<string, never>
     Functions: {
       my_workspace_ids: {
         Args:    Record<string, never>
         Returns: string[]
       }
+      is_workspace_admin: {
+        Args:    { p_workspace_id: string }
+        Returns: boolean
+      }
       create_workspace_with_admin: {
-        Args: { p_name: string; p_slug: string; p_user_id: string }
+        Args:    { p_name: string; p_slug: string; p_user_id: string }
         Returns: string
+      }
+      profiles_for_workspace: {
+        Args:    { p_workspace_id: string }
+        Returns: { id: string; full_name: string | null; email: string }[]
       }
     }
     Enums: {
@@ -227,9 +255,6 @@ export interface Database {
       deal_stage:          DealStage
       activity_type:       ActivityType
       subscription_status: SubscriptionStatus
-    }
-    CompositeTypes: {
-      [_ in never]: never
     }
   }
 }
