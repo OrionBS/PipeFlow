@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Syne, DM_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,7 +42,10 @@ export default function RootLayout({
       className={`${inter.variable} ${syne.variable} ${dmSans.variable} ${ibmPlexMono.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+        <Toaster richColors position="bottom-right" />
+      </body>
     </html>
   );
 }

@@ -162,43 +162,53 @@ export type SubscriptionUpdate    = Partial<Omit<SubscriptionRow,    'id' | 'cre
 
 // ---------------------------------------------------------------------------
 // Database — tipo raiz para createClient<Database>()
+// Relationships[] é exigido pelo @supabase/supabase-js v2.x para resolução
+// de tipos nos builders de query.
 // ---------------------------------------------------------------------------
 
 export interface Database {
   public: {
     Tables: {
       workspaces: {
-        Row:    WorkspaceRow
-        Insert: WorkspaceInsert
-        Update: WorkspaceUpdate
+        Row:           WorkspaceRow
+        Insert:        WorkspaceInsert
+        Update:        WorkspaceUpdate
+        Relationships: []
       }
       workspace_members: {
-        Row:    WorkspaceMemberRow
-        Insert: WorkspaceMemberInsert
-        Update: WorkspaceMemberUpdate
+        Row:           WorkspaceMemberRow
+        Insert:        WorkspaceMemberInsert
+        Update:        WorkspaceMemberUpdate
+        Relationships: []
       }
       leads: {
-        Row:    LeadRow
-        Insert: LeadInsert
-        Update: LeadUpdate
+        Row:           LeadRow
+        Insert:        LeadInsert
+        Update:        LeadUpdate
+        Relationships: []
       }
       deals: {
-        Row:    DealRow
-        Insert: DealInsert
-        Update: DealUpdate
+        Row:           DealRow
+        Insert:        DealInsert
+        Update:        DealUpdate
+        Relationships: []
       }
       activities: {
-        Row:    ActivityRow
-        Insert: ActivityInsert
-        Update: ActivityUpdate
+        Row:           ActivityRow
+        Insert:        ActivityInsert
+        Update:        ActivityUpdate
+        Relationships: []
       }
       subscriptions: {
-        Row:    SubscriptionRow
-        Insert: SubscriptionInsert
-        Update: SubscriptionUpdate
+        Row:           SubscriptionRow
+        Insert:        SubscriptionInsert
+        Update:        SubscriptionUpdate
+        Relationships: []
       }
     }
-    Views: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       my_workspace_ids: {
         Args:    Record<string, never>
@@ -217,6 +227,9 @@ export interface Database {
       deal_stage:          DealStage
       activity_type:       ActivityType
       subscription_status: SubscriptionStatus
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

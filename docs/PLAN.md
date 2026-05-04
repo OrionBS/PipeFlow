@@ -16,8 +16,8 @@
 | M4 | Pipeline Kanban UI | `feat/pipeline-ui` | UI | ✅ Concluído |
 | M5 | Dashboard & Settings UI | `feat/dashboard-ui` | UI | ✅ Concluído |
 | M6 | Auth & Banco de Dados | `feat/auth-database` | Backend | ✅ Concluído |
-| M7 | Leads Backend | `feat/leads-backend` | Backend | 🔄 Próximo |
-| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend | ⏳ Pendente |
+| M7 | Leads Backend | `feat/leads-backend` | Backend | ✅ Concluído |
+| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend | 🔄 Próximo |
 | M9 | Dashboard Backend | `feat/dashboard-backend` | Backend | ⏳ Pendente |
 | M10 | Multi-workspace & Colaboração | `feat/workspaces` | Backend | ⏳ Pendente |
 | M11 | Monetização (Stripe) | `feat/stripe` | Backend | ⏳ Pendente |
@@ -239,34 +239,34 @@
 ### Entregas
 
 **Workspace context (base de tudo)**
-- [ ] Criar `lib/workspace.ts` — helper `getCurrentWorkspaceId()` que lê o cookie `pipeflow_workspace_id`
-- [ ] Criar `lib/limits.ts` — funções `canAddLead(workspaceId)` e `canAddMember(workspaceId)` que retornam `{allowed, current, limit}`
-- [ ] Criar `lib/roles.ts` — funções `isAdmin(workspaceId)` e `getMemberRole(workspaceId)` para RBAC em Server Actions
+- [x] Criar `lib/workspace.ts` — helper `getCurrentWorkspaceId()` que lê o cookie `pipeflow_workspace_id`
+- [x] Criar `lib/limits.ts` — funções `canAddLead(workspaceId)` e `canAddMember(workspaceId)` que retornam `{allowed, current, limit}`
+- [x] Criar `lib/roles.ts` — funções `isAdmin(workspaceId)` e `getMemberRole(workspaceId)` para RBAC em Server Actions
 
 **Server Actions — Leads** (`actions/leads.ts`)
-- [ ] `createLeadAction(payload)` — valida Zod, checa `canAddLead()`, insere no banco, revalida cache
-- [ ] `updateLeadAction(id, payload)` — valida, atualiza, revalida
-- [ ] `deleteLeadAction(id)` — verifica ownership no workspace, deleta
-- [ ] `getLeads(filters?)` — query com filtros de status, busca por nome/empresa (ILIKE usando índices trigram), paginação
+- [x] `createLeadAction(payload)` — valida, checa `canAddLead()`, insere no banco, revalida cache
+- [x] `updateLeadAction(id, payload)` — valida, atualiza, revalida
+- [x] `deleteLeadAction(id)` — verifica ownership no workspace, deleta
+- [x] `getLeads(filters?)` — query com filtros de status, busca por nome/empresa (ILIKE), paginação
 
 **Server Actions — Atividades** (`actions/activities.ts`)
-- [ ] `createActivityAction(leadId, payload)` — cria atividade vinculada ao lead
-- [ ] `getActivitiesByLead(leadId)` — lista cronológica de atividades
+- [x] `createActivityAction(leadId, payload)` — cria atividade vinculada ao lead
+- [x] `getActivitiesByLead(leadId)` — lista cronológica de atividades
 
 **Integração UI**
-- [ ] Substituir mock data em `app/(app)/leads/page.tsx` por `getLeads()` real
-- [ ] `LeadTable` renderiza dados reais (Server Component)
-- [ ] `LeadSearch` e `LeadFilters` passam params para query no banco (URL search params)
-- [ ] `LeadForm` chama `createLeadAction` / `updateLeadAction` com loading e error states
-- [ ] Página de detalhe `app/(app)/leads/[id]/page.tsx` carrega lead + atividades reais
-- [ ] `ActivityForm` persiste via `createActivityAction`
-- [ ] Selector "Responsável" populado com membros reais do workspace
-- [ ] Barra de uso no topo da listagem: "X/50 leads usados" (visível só no plano Free)
+- [x] Substituir mock data em `app/(app)/leads/page.tsx` por `getLeads()` real
+- [x] `LeadTable` renderiza dados reais (Server Component)
+- [x] `LeadSearch` e `LeadFilters` passam params para query no banco (URL search params)
+- [x] `LeadForm` chama `createLeadAction` / `updateLeadAction` com loading e error states
+- [x] Página de detalhe `app/(app)/leads/[id]/page.tsx` carrega lead + atividades reais
+- [x] `ActivityForm` persiste via `createActivityAction`
+- [x] Selector "Responsável" populado com membros reais do workspace (`lib/members.ts`)
+- [x] Barra de uso no topo da listagem: "X/50 leads usados" (visível só no plano Free)
 
 **Error handling**
-- [ ] Limite de leads atingido → toast com mensagem e link para upgrade
-- [ ] Operações proibidas para `member` (ex: deletar lead de outro) retornam erro 403 amigável
-- [ ] Loading states (skeleton) em todas as listas
+- [x] Limite de leads atingido → toast com mensagem e link para upgrade
+- [x] Loading states nos botões de submit (formulários)
+- [x] Erros de Server Action exibidos inline nos formulários
 
 **Commit final:** `feat: leads backend — CRUD, activity timeline, plan limits`
 

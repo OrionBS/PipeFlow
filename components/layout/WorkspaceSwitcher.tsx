@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Menu } from "@base-ui/react/menu"
 import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { setActiveWorkspace } from "@/actions/workspace"
 
 interface Workspace {
   id: string
@@ -19,10 +20,17 @@ interface WorkspaceSwitcherProps {
 
 export function WorkspaceSwitcher({ workspaces }: WorkspaceSwitcherProps) {
   const router = useRouter()
+  const [, startTransition] = useTransition()
   const [currentId, setCurrentId] = useState<string>(workspaces[0]?.id ?? "")
   const current = workspaces.find((ws) => ws.id === currentId) ?? workspaces[0]
 
   if (!current) return null
+
+  async function handleSwitch(id: string) {
+    setCurrentId(id)
+    await setActiveWorkspace(id)
+    startTransition(() => router.refresh())
+  }
 
   return (
     <Menu.Root modal={false}>
@@ -50,7 +58,7 @@ export function WorkspaceSwitcher({ workspaces }: WorkspaceSwitcherProps) {
             {workspaces.map((ws) => (
               <Menu.Item
                 key={ws.id}
-                onClick={() => setCurrentId(ws.id)}
+                onClick={() => handleSwitch(ws.id)}
                 className={cn(
                   "flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 text-sm outline-none transition-colors",
                   "hover:bg-accent focus-visible:bg-accent"
