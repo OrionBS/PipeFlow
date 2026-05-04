@@ -1,8 +1,10 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
+import { WORKSPACE_COOKIE } from "@/lib/workspace"
 import type { PlanType } from "@/src/types/supabase"
 
 export type WorkspaceResult = { error: string } | null
@@ -51,4 +53,15 @@ export async function getWorkspaces(): Promise<
     .order("created_at", { ascending: true })
 
   return (data ?? []) as { id: string; name: string; slug: string; plan: PlanType }[]
+}
+
+export async function setActiveWorkspace(workspaceId: string): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.set(WORKSPACE_COOKIE, workspaceId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+  })
 }
