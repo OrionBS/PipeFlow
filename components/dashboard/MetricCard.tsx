@@ -1,14 +1,21 @@
 "use client"
 
-import type { LucideIcon } from "lucide-react"
+import { Users, TrendingUp, DollarSign, Target, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Users,
+  TrendingUp,
+  DollarSign,
+  Target,
+}
 
 interface MetricCardProps {
   title: string
   value: string
   change?: string
   changePositive?: boolean
-  icon: LucideIcon
+  iconName: string
   accent?: string
   staggerIndex?: number
 }
@@ -18,10 +25,11 @@ export function MetricCard({
   value,
   change,
   changePositive = true,
-  icon: Icon,
+  iconName,
   accent = "#CAFF33",
   staggerIndex = 0,
 }: MetricCardProps) {
+  const Icon = ICON_MAP[iconName] ?? Users
   const staggerClass = ["pf-stagger-1", "pf-stagger-2", "pf-stagger-3", "pf-stagger-4"][staggerIndex] ?? "pf-stagger-1"
 
   return (

@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import { Users, TrendingUp, DollarSign, Target } from "lucide-react"
 import { MetricCard } from "@/components/dashboard/MetricCard"
 import { FunnelChart } from "@/components/dashboard/FunnelChart"
 import { DealsDeadlineList } from "@/components/dashboard/DealsDeadlineList"
@@ -51,7 +50,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           value={String(totalLeads)}
           change={`Últimos ${period}`}
           changePositive
-          icon={Users}
+          iconName="Users"
           accent="#3B82F6"
           staggerIndex={0}
         />
@@ -60,7 +59,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           value={String(openDealsCount)}
           change="Em andamento"
           changePositive
-          icon={TrendingUp}
+          iconName="TrendingUp"
           accent="#06B6D4"
           staggerIndex={1}
         />
@@ -69,7 +68,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           value={formatCurrency(pipelineValue)}
           change="Negócios ativos"
           changePositive
-          icon={DollarSign}
+          iconName="DollarSign"
           accent="#CAFF33"
           staggerIndex={2}
         />
@@ -78,7 +77,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           value={`${conversionRate}%`}
           change="Ganhos / Total"
           changePositive={conversionRate > 0}
-          icon={Target}
+          iconName="Target"
           accent="#22C55E"
           staggerIndex={3}
         />
