@@ -25,6 +25,53 @@
 
 ---
 
+## Identidade Visual — NUNCA ALTERAR
+
+> **REGRA ABSOLUTA:** A identidade visual do PipeFlow está travada. Nenhuma alteração de cores, fontes ou tokens de design deve ser feita sem aprovação explícita do usuário. Toda nova feature, componente ou refatoração deve respeitar esta identidade.
+
+### Commit de referência
+`5fbd638` — `style: establish lime-green brand identity (#CAFF33) as primary color`
+
+### Paleta canônica
+
+| Token | Valor | Uso |
+|---|---|---|
+| **Accent primário** | `#CAFF33` / `oklch(0.91 0.275 130)` | Botões CTA, badges, destaques, links ativos |
+| **Foreground no accent** | `#0C0C0E` / `oklch(0.1 0 0)` | Texto sobre fundo lime-green |
+| **Background** | `#0C0C0E` / `oklch(0.145 0 0)` | Fundo da aplicação (sempre dark) |
+| **Foreground** | `#E8E8E8` / `oklch(0.985 0 0)` | Texto principal |
+| **Muted** | `#555559` / `oklch(0.708 0 0)` | Texto secundário, placeholders |
+| **Border** | `rgba(255,255,255,0.08)` | Bordas padrão (dark) |
+| **Destructivo** | `#EF4444` | Erros, exclusão, alertas |
+
+### Tokens CSS (`globals.css`)
+
+```css
+/* dark mode — sempre ativo via class="dark" no <html> */
+--primary:          oklch(0.91 0.275 130);   /* #CAFF33 */
+--primary-foreground: oklch(0.1 0 0);        /* #0C0C0E */
+--background:       oklch(0.145 0 0);        /* #0C0C0E */
+--foreground:       oklch(0.985 0 0);        /* #E8E8E8 */
+```
+
+### Fontes canônicas
+
+| Variável | Fonte | Uso |
+|---|---|---|
+| `--font-syne` | Syne | Títulos, headings, labels bold |
+| `--font-dm-sans` | DM Sans | Corpo de texto, UI geral |
+| `--font-ibm-mono` | IBM Plex Mono | Valores monetários, dados tabulares, código |
+
+### Regras invioláveis
+
+- **NUNCA** substituir `#CAFF33` por azul, indigo, roxo ou qualquer outra cor
+- **NUNCA** remover a classe `dark` do `<html>` — o app é sempre dark
+- **NUNCA** alterar `--primary` para hue diferente de ~130° (lime-green)
+- Componentes novos devem usar `text-primary`, `bg-primary`, `border-primary` para herdar o lime automaticamente via CSS vars
+- Componentes existentes que usam `#CAFF33` hardcoded (Kanban, sidebar) devem permanecer inalterados
+
+---
+
 ## M0 — Setup & Scaffolding
 
 **Branch:** `main`
