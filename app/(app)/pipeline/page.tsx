@@ -10,7 +10,7 @@ export default async function PipelinePage() {
   const [deals, { leads }, owners] = await Promise.all([
     getDeals(),
     getLeads({ pageSize: 500 }),
-    getWorkspaceOwners(workspaceId),
+    getWorkspaceOwners(workspaceId).catch(() => [] as import("@/lib/members").Owner[]),
   ])
 
   return (

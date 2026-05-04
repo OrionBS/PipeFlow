@@ -26,7 +26,7 @@ async function LeadsContent({ searchParams }: { searchParams: SearchParams }) {
 
   const [{ leads, total }, owners, limitCheck, supabase] = await Promise.all([
     getLeads({ search, status, owner_id: owner, page, pageSize: PAGE_SIZE }),
-    getWorkspaceOwners(workspaceId),
+    getWorkspaceOwners(workspaceId).catch(() => [] as import("@/lib/members").Owner[]),
     canAddLead(workspaceId),
     createClient(),
   ])
