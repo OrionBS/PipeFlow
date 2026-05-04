@@ -31,7 +31,7 @@ interface LeadFormProps {
   onOpenChange: (open: boolean) => void
   lead?: Lead | null
   owners: Owner[]
-  onSubmit: (data: Partial<Lead>) => void
+  onSubmit: (data: Partial<Lead>) => Promise<string | null>
 }
 
 const EMPTY_FORM = {
@@ -55,6 +55,8 @@ export function LeadForm({ open, onOpenChange, lead, owners, onSubmit }: LeadFor
     owner_id: lead?.owner_id ?? "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   function handleOpenChange(open: boolean) {
     if (!open) {
@@ -68,6 +70,7 @@ export function LeadForm({ open, onOpenChange, lead, owners, onSubmit }: LeadFor
         owner_id: lead.owner_id ?? "",
       } : EMPTY_FORM)
       setErrors({})
+      setServerError(null)
     }
     onOpenChange(open)
   }
@@ -81,20 +84,32 @@ export function LeadForm({ open, onOpenChange, lead, owners, onSubmit }: LeadFor
     return next
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
     }
-    onSubmit({
+
+    setLoading(true)
+    setServerError(null)
+
+    const error = await onSubmit({
       ...form,
       phone: form.phone || null,
       company: form.company || null,
       role: form.role || null,
       owner_id: form.owner_id || null,
     })
+
+    setLoading(false)
+
+    if (error) {
+      setServerError(error)
+      return
+    }
+
     handleOpenChange(false)
   }
 
@@ -108,6 +123,12 @@ export function LeadForm({ open, onOpenChange, lead, owners, onSubmit }: LeadFor
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {serverError && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {serverError}
+            </p>
+          )}
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="name">
@@ -210,10 +231,17 @@ export function LeadForm({ open, onOpenChange, lead, owners, onSubmit }: LeadFor
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={loading}
+            >
               Cancelar
             </Button>
-            <Button type="submit">{isEditing ? "Salvar alterações" : "Criar lead"}</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Salvando…" : isEditing ? "Salvar alterações" : "Criar lead"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

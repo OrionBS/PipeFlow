@@ -5,17 +5,28 @@ import { cn } from "@/lib/utils"
 import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+interface Workspace {
+  id: string
+  name: string
+  slug: string
+  plan: string
+}
+
+interface AppShellProps {
+  children: React.ReactNode
+  workspaces: Workspace[]
+  user: { name: string; email: string }
+}
+
+export function AppShell({ children, workspaces, user }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* ── Desktop sidebar (always visible ≥ lg) ── */}
       <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col">
-        <Sidebar />
+        <Sidebar workspaces={workspaces} user={user} />
       </aside>
 
-      {/* ── Mobile backdrop ── */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 lg:hidden"
@@ -24,7 +35,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* ── Mobile sidebar (slide-in drawer) ── */}
       <aside
         aria-hidden={!sidebarOpen}
         inert={!sidebarOpen}
@@ -33,10 +43,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <Sidebar onNavigate={() => setSidebarOpen(false)} />
+        <Sidebar workspaces={workspaces} user={user} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
-      {/* ── Main content ── */}
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <TopBar onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-auto p-6">{children}</main>

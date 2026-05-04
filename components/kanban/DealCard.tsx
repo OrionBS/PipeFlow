@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { CalendarDays } from "lucide-react"
@@ -12,11 +13,6 @@ interface DealCardProps {
   ownerInitials: string
   stageAccent: string
   onClick: () => void
-}
-
-function isOverdue(deadline: string | null): boolean {
-  if (!deadline) return false
-  return new Date(deadline) < new Date()
 }
 
 function formatDeadline(deadline: string): string {
@@ -46,7 +42,11 @@ export function DealCard({ deal, leadName, ownerInitials, stageAccent, onClick }
     isDragging,
   } = useSortable({ id: deal.id })
 
-  const overdue = isOverdue(deal.deadline)
+  // Initialized to false to match SSR; set on the client after hydration to avoid mismatch
+  const [overdue, setOverdue] = useState(false)
+  useEffect(() => {
+    if (deal.deadline) setOverdue(new Date(deal.deadline) < new Date())
+  }, [deal.deadline])
 
   const style = {
     transform: CSS.Transform.toString(transform),

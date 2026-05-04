@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -13,46 +14,52 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TYPE_CONFIG } from "@/components/leads/ActivityTimeline"
-import type { Activity, ActivityType } from "@/types"
+import { createActivityAction } from "@/actions/activities"
+import type { ActivityType } from "@/types"
 
 interface ActivityFormProps {
   leadId: string
-  onSubmit: (activity: Activity) => void
 }
 
 const ACTIVITY_TYPES = Object.keys(TYPE_CONFIG) as ActivityType[]
 
-export function ActivityForm({ leadId, onSubmit }: ActivityFormProps) {
+export function ActivityForm({ leadId }: ActivityFormProps) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<ActivityType>("call")
   const [description, setDescription] = useState("")
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 16))
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!description.trim()) {
       setError("Descrição é obrigatória.")
       return
     }
-    alert("Registrar atividade chegará no M8 com backend real.")
-    return
-    const activity: Activity = {
-      id: `act-${Date.now()}`,
-      workspace_id: "ws-1",
-      lead_id: leadId,
+
+    setLoading(true)
+    setError("")
+
+    const result = await createActivityAction(leadId, {
       type,
-      description: description.trim(),
-      author_id: "user-1",
+      description,
       date: new Date(date).toISOString(),
-      created_at: new Date().toISOString(),
+    })
+
+    setLoading(false)
+
+    if ("error" in result) {
+      setError(result.error)
+      return
     }
-    onSubmit(activity)
+
     setDescription("")
     setType("call")
     setDate(new Date().toISOString().slice(0, 16))
-    setError("")
     setOpen(false)
+    router.refresh()
   }
 
   if (!open) {
@@ -125,11 +132,12 @@ export function ActivityForm({ leadId, onSubmit }: ActivityFormProps) {
             setOpen(false)
             setError("")
           }}
+          disabled={loading}
         >
           Cancelar
         </Button>
-        <Button type="submit" size="sm">
-          Salvar
+        <Button type="submit" size="sm" disabled={loading}>
+          {loading ? "Salvando…" : "Salvar"}
         </Button>
       </div>
     </form>

@@ -55,12 +55,12 @@ function computeDeadlineDeals() {
     }))
 }
 
-const { totalLeads, openDealsCount, pipelineValue, conversionRate } = computeMetrics()
-const funnelData = computeFunnelData()
-const deadlineDeals = computeDeadlineDeals()
-
 export default function DashboardPage() {
   const [period, setPeriod] = useState<Period>("30d")
+
+  const { totalLeads, openDealsCount, pipelineValue, conversionRate } = computeMetrics()
+  const funnelData = computeFunnelData()
+  const deadlineDeals = computeDeadlineDeals()
 
   return (
     <div className="flex flex-col gap-6 pf-page-enter">
