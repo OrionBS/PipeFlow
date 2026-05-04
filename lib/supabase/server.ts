@@ -1,8 +1,11 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { cache } from "react"
 import type { Database } from "@/src/types/supabase"
 
-export async function createClient() {
+// cache() deduplicates this call within a single request — all server actions
+// that call createClient() in the same render share the same instance.
+export const createClient = cache(async function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -30,4 +33,4 @@ export async function createClient() {
       },
     },
   })
-}
+})

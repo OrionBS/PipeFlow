@@ -18,23 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 import { COLUMN_CONFIG } from "./KanbanColumn"
+import { createDealAction } from "@/actions/deals"
 import type { Deal, DealStage, Lead } from "@/types"
-
-interface Member {
-  id: string
-  user_id: string | null
-  name: string
-  initials: string
-}
+import type { Owner } from "@/lib/members"
 
 interface NewDealModalProps {
   open: boolean
   onClose: () => void
-  onSave: (deal: Omit<Deal, "id" | "workspace_id" | "created_at">) => void
+  onCreated: (deal: Deal) => void
   leads: Lead[]
-  members: Member[]
+  owners: Owner[]
 }
 
 interface FormState {
@@ -57,9 +52,11 @@ const EMPTY: FormState = {
 
 const STAGES = Object.entries(COLUMN_CONFIG) as [DealStage, { label: string; color: string; accent: string }][]
 
-export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealModalProps) {
+export function NewDealModal({ open, onClose, onCreated, leads, owners }: NewDealModalProps) {
   const [form, setForm] = useState<FormState>(EMPTY)
   const [errors, setErrors] = useState<Partial<FormState>>({})
+  const [loading, setLoading] = useState(false)
+  const [serverError, setServerError] = useState("")
 
   function validate(): boolean {
     const next: Partial<FormState> = {}
@@ -71,9 +68,12 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
     return Object.keys(next).length === 0
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!validate()) return
-    onSave({
+    setLoading(true)
+    setServerError("")
+
+    const result = await createDealAction({
       lead_id: form.lead_id,
       title: form.title.trim(),
       value: Number(form.value),
@@ -81,14 +81,26 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
       owner_id: form.owner_id || null,
       deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
     })
+
+    setLoading(false)
+
+    if ("error" in result) {
+      setServerError(result.error)
+      return
+    }
+
+    onCreated(result.deal)
     setForm(EMPTY)
     setErrors({})
+    setServerError("")
     onClose()
   }
 
   function handleClose() {
+    if (loading) return
     setForm(EMPTY)
     setErrors({})
+    setServerError("")
     onClose()
   }
 
@@ -193,7 +205,7 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
             </Select>
           </Field>
 
-          {/* Etapa — pills com cor do estágio */}
+          {/* Etapa — pills */}
           <div className="grid gap-1.5">
             <Label
               className="text-[10px] uppercase tracking-widest font-medium"
@@ -228,16 +240,13 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
             {/* Responsável */}
             <Field label="Responsável">
               <Select value={form.owner_id} onValueChange={set("owner_id")}>
-                <SelectTrigger
-                  className="h-9 text-sm border-0"
-                  style={inputStyle}
-                >
+                <SelectTrigger className="h-9 text-sm border-0" style={inputStyle}>
                   <SelectValue placeholder="Nenhum" />
                 </SelectTrigger>
                 <SelectContent style={{ background: "#141416", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  {members.map((m) => (
-                    <SelectItem key={m.id} value={m.user_id ?? m.id} style={{ color: "#E8E8E8" }}>
-                      {m.name}
+                  {owners.map((o) => (
+                    <SelectItem key={o.id} value={o.id} style={{ color: "#E8E8E8" }}>
+                      {o.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -255,15 +264,23 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
               />
             </Field>
           </div>
+
+          {serverError && (
+            <p
+              className="text-[12px] font-medium"
+              style={{ color: "#EF4444", fontFamily: "var(--font-dm-sans, sans-serif)" }}
+            >
+              {serverError}
+            </p>
+          )}
         </div>
 
-        <DialogFooter
-          className="px-6 pb-6 pt-0 gap-2"
-        >
+        <DialogFooter className="px-6 pb-6 pt-0 gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleClose}
+            disabled={loading}
             style={{
               background: "transparent",
               border: "1px solid rgba(255,255,255,0.1)",
@@ -276,7 +293,8 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
           <Button
             size="sm"
             onClick={handleSave}
-            className="font-semibold transition-all duration-200"
+            disabled={loading}
+            className="font-semibold transition-all duration-200 gap-1.5"
             style={{
               background: "#CAFF33",
               color: "#0C0C0E",
@@ -284,13 +302,15 @@ export function NewDealModal({ open, onClose, onSave, leads, members }: NewDealM
               fontFamily: "var(--font-syne, sans-serif)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(202,255,51,0.3)"
+              if (!loading)
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(202,255,51,0.3)"
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.boxShadow = ""
             }}
           >
-            Salvar negócio
+            {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {loading ? "Salvando..." : "Salvar negócio"}
           </Button>
         </DialogFooter>
       </DialogContent>

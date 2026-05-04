@@ -1,9 +1,12 @@
 import { cookies } from "next/headers"
+import { cache } from "react"
 import { createClient } from "@/lib/supabase/server"
 
 export const WORKSPACE_COOKIE = "pipeflow_workspace_id"
 
-export async function getCurrentWorkspaceId(): Promise<string> {
+// cache() ensures this resolves once per request regardless of how many
+// actions call it in parallel (getDeals, getLeads, getWorkspaceOwners, etc.)
+export const getCurrentWorkspaceId = cache(async function getCurrentWorkspaceId(): Promise<string> {
   const cookieStore = await cookies()
   const fromCookie = cookieStore.get(WORKSPACE_COOKIE)?.value
   if (fromCookie) return fromCookie
@@ -18,4 +21,4 @@ export async function getCurrentWorkspaceId(): Promise<string> {
     .maybeSingle() as { data: { id: string } | null }
 
   return data?.id ?? ""
-}
+})
