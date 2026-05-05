@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,7 +47,10 @@ function validate(
   return errors
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams()
+  const invite = searchParams.get("invite")
+
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -69,7 +73,7 @@ export default function RegisterPage() {
     setErrors({})
     setSuccessMsg("")
     setLoading(true)
-    const result = await register(name, email, password)
+    const result = await register(name, email, password, invite ?? undefined)
     if (result && "error" in result) {
       setErrors({ form: result.error })
       setLoading(false)
@@ -77,7 +81,6 @@ export default function RegisterPage() {
       setSuccessMsg(result.success)
       setLoading(false)
     }
-    // On success with immediate session, `register` calls redirect() — no need to handle here
   }
 
   return (
@@ -86,7 +89,10 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold tracking-tight">Criar sua conta</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Já tem conta?{" "}
-          <Link href="/login" className="text-primary hover:underline font-medium">
+          <Link
+            href={invite ? `/login?invite=${invite}` : "/login"}
+            className="text-primary hover:underline font-medium"
+          >
             Entrar
           </Link>
         </p>
@@ -203,5 +209,13 @@ export default function RegisterPage() {
         </p>
       </form>
     </>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   )
 }

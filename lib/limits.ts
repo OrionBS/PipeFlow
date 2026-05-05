@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 
 const FREE_LIMITS = { leads: 50, members: 2 } as const
 
@@ -9,11 +9,10 @@ export interface LimitCheck {
 }
 
 export async function canAddLead(workspaceId: string): Promise<LimitCheck> {
-  const supabase = await createClient()
+  const service = createServiceClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = supabase as any
+  const db = service as any
 
-  // Run plan check and count in parallel instead of sequentially
   const [wsResult, countResult] = await Promise.all([
     db.from("workspaces").select("plan").eq("id", workspaceId).single() as Promise<{ data: { plan: string } | null }>,
     db.from("leads").select("id", { count: "exact", head: true }).eq("workspace_id", workspaceId) as Promise<{ count: number | null }>,
@@ -26,9 +25,9 @@ export async function canAddLead(workspaceId: string): Promise<LimitCheck> {
 }
 
 export async function canAddMember(workspaceId: string): Promise<LimitCheck> {
-  const supabase = await createClient()
+  const service = createServiceClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = supabase as any
+  const db = service as any
 
   const [wsResult, countResult] = await Promise.all([
     db.from("workspaces").select("plan").eq("id", workspaceId).single() as Promise<{ data: { plan: string } | null }>,

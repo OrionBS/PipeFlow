@@ -84,7 +84,7 @@ export interface ActivityRow {
   type: ActivityType
   description: string
   author_id: string
-  date: string
+  occurred_at: string
   created_at: string
 }
 

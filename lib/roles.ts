@@ -1,12 +1,17 @@
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 
 export async function getMemberRole(workspaceId: string): Promise<"admin" | "member" | null> {
+  if (!workspaceId) return null
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  // Use service client to bypass RLS — user identity is already validated above
+  const service = createServiceClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await (service as any)
     .from("workspace_members")
     .select("role")
     .eq("workspace_id", workspaceId)
