@@ -25,21 +25,29 @@ export async function createWorkspace(
   // Single atomic transaction via RPC — avoids the bootstrap RLS problem and
   // eliminates any race between workspace INSERT and member INSERT.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: rpcError } = await (service as any).rpc(
+  const { data: workspaceId, error: rpcError } = await (service as any).rpc(
     "create_workspace_with_admin",
     { p_name: name, p_slug: slug, p_user_id: user.id }
-  )
+  ) as { data: string | null; error: { code: string } | null }
 
-  if (rpcError) {
+  if (rpcError || !workspaceId) {
     // Postgres unique_violation on slug column
-    if (rpcError.code === "23505") {
+    if (rpcError?.code === "23505") {
       return { error: "Esse slug já está em uso. Escolha outro nome." }
     }
     return { error: "Erro ao criar workspace. Tente novamente." }
   }
 
-  // Return null on success — let the caller decide where to redirect.
-  // Onboarding shows step 2 (invite) before navigating to dashboard.
+  // Set the active workspace cookie so getCurrentWorkspaceId resolves immediately
+  const cookieStore = await cookies()
+  cookieStore.set(WORKSPACE_COOKIE, workspaceId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+  })
+
   return null
 }
 

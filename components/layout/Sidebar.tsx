@@ -25,18 +25,19 @@ interface Workspace {
 
 interface SidebarProps {
   workspaces: Workspace[]
+  currentWorkspaceId: string
   user: { name: string; email: string }
   onNavigate?: () => void
 }
 
-export function Sidebar({ workspaces, user, onNavigate }: SidebarProps) {
+export function Sidebar({ workspaces, currentWorkspaceId, user, onNavigate }: SidebarProps) {
   const pathname = usePathname()
   const currentPlan = workspaces[0]?.plan ?? "free"
 
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border">
       <div className="p-3 border-b border-sidebar-border">
-        <WorkspaceSwitcher workspaces={workspaces} />
+        <WorkspaceSwitcher workspaces={workspaces} currentWorkspaceId={currentWorkspaceId} />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">

@@ -16,12 +16,13 @@ interface Workspace {
 
 interface WorkspaceSwitcherProps {
   workspaces: Workspace[]
+  currentWorkspaceId: string
 }
 
-export function WorkspaceSwitcher({ workspaces }: WorkspaceSwitcherProps) {
+export function WorkspaceSwitcher({ workspaces, currentWorkspaceId }: WorkspaceSwitcherProps) {
   const router = useRouter()
   const [, startTransition] = useTransition()
-  const [currentId, setCurrentId] = useState<string>(workspaces[0]?.id ?? "")
+  const [currentId, setCurrentId] = useState<string>(currentWorkspaceId || workspaces[0]?.id || "")
   const current = workspaces.find((ws) => ws.id === currentId) ?? workspaces[0]
 
   if (!current) return null

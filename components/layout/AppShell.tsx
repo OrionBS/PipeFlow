@@ -15,16 +15,17 @@ interface Workspace {
 interface AppShellProps {
   children: React.ReactNode
   workspaces: Workspace[]
+  currentWorkspaceId: string
   user: { name: string; email: string }
 }
 
-export function AppShell({ children, workspaces, user }: AppShellProps) {
+export function AppShell({ children, workspaces, currentWorkspaceId, user }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="hidden lg:flex w-64 flex-shrink-0 flex-col">
-        <Sidebar workspaces={workspaces} user={user} />
+        <Sidebar workspaces={workspaces} currentWorkspaceId={currentWorkspaceId} user={user} />
       </aside>
 
       {sidebarOpen && (
@@ -43,7 +44,7 @@ export function AppShell({ children, workspaces, user }: AppShellProps) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <Sidebar workspaces={workspaces} user={user} onNavigate={() => setSidebarOpen(false)} />
+        <Sidebar workspaces={workspaces} currentWorkspaceId={currentWorkspaceId} user={user} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
