@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 
 export type AuthResult = { error: string } | { success: string } | null
 
-export async function login(email: string, password: string): Promise<AuthResult> {
+export async function login(email: string, password: string, redirectTo?: string): Promise<AuthResult> {
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -17,22 +17,24 @@ export async function login(email: string, password: string): Promise<AuthResult
     return { error: "E-mail ou senha incorretos." }
   }
 
-  redirect("/dashboard")
+  redirect(redirectTo ?? "/dashboard")
 }
 
 export async function register(
   name: string,
   email: string,
-  password: string
+  password: string,
+  inviteToken?: string
 ): Promise<AuthResult> {
   const supabase = await createClient()
+  const nextPath = inviteToken ? `/invite/${inviteToken}` : "/onboarding"
 
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { full_name: name },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboarding`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=${nextPath}`,
     },
   })
 
@@ -46,10 +48,8 @@ export async function register(
     return { error: "Erro ao criar conta. Tente novamente." }
   }
 
-  // If email confirmation is disabled in Supabase, the session is created immediately
-  // and we can redirect straight to onboarding. Otherwise, tell the user to check email.
   if (data.session) {
-    redirect("/onboarding")
+    redirect(nextPath)
   }
 
   return { success: "Conta criada! Verifique seu e-mail para confirmar o cadastro antes de entrar." }

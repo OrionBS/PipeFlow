@@ -17,9 +17,9 @@
 | M5 | Dashboard & Settings UI | `feat/dashboard-ui` | UI | ✅ Concluído |
 | M6 | Auth & Banco de Dados | `feat/auth-database` | Backend | ✅ Concluído |
 | M7 | Leads Backend | `feat/leads-backend` | Backend | ✅ Concluído |
-| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend | 🔄 Próximo |
+| M8 | Pipeline Backend | `feat/pipeline-backend` | Backend | ✅ Concluído |
 | M9 | Dashboard Backend | `feat/dashboard-backend` | Backend | ⏳ Pendente |
-| M10 | Multi-workspace & Colaboração | `feat/workspaces` | Backend | ⏳ Pendente |
+| M10 | Multi-workspace & Colaboração | `feat/collaboration` | Backend | 🔄 Em andamento |
 | M11 | Monetização (Stripe) | `feat/stripe` | Backend | ⏳ Pendente |
 | M12 | Deploy & Produção | `feat/production` | Launch | ⏳ Pendente |
 
@@ -367,30 +367,38 @@
 
 ## M10 — Multi-workspace & Colaboração
 
-**Branch:** `feat/workspaces`
+**Branch:** `feat/collaboration`
 **Objetivo:** Sistema multi-workspace completo — criação, alternância, convite por e-mail, papéis e controle de acesso.
 
 ### Entregas
 
 **Workspaces**
-- [ ] Usuário pode criar múltiplos workspaces
-- [ ] `WorkspaceSwitcher` carrega workspaces reais do usuário logado
-- [ ] Alternância de workspace muda contexto de todos os dados (sem reload de página)
-- [ ] workspace_id atual salvo em cookie de sessão
+- [x] Usuário pode criar múltiplos workspaces (`createWorkspace` + onboarding)
+- [x] `WorkspaceSwitcher` carrega workspaces reais do usuário logado (`getWorkspaces`)
+- [x] Alternância de workspace via `setActiveWorkspace` grava cookie e revalida
+- [x] workspace_id atual salvo em cookie `pipeflow_workspace_id`
 
 **Convites**
-- [ ] Instalar `resend`
-- [ ] Server Action `inviteMember` — cria registro em `invites`, envia e-mail via Resend
-- [ ] Template de e-mail de convite com link de aceite
-- [ ] `app/(auth)/invite/[token]/page.tsx` — valida token, cria membership, redireciona para o workspace
+- [x] Instalar `resend`
+- [x] Tabela `workspace_invites` — id, workspace_id, email, token (uuid), role, invited_by, expires_at, accepted_at (`016_workspace_invites.sql`)
+- [x] RLS na `workspace_invites` — admins inserem/deletam, membros lêem, service role para accept
+- [x] `lib/email.ts` — cliente Resend + `sendInviteEmail` com template HTML
+- [x] `inviteMember` — checa limite Free (2 membros), insere em `workspace_invites`, envia e-mail
+- [x] `cancelInvite` — admin cancela convite pendente
+- [x] `acceptInvite(token)` — valida token, cria `workspace_member`, marca aceito, define cookie
+- [x] `app/(auth)/invite/[token]/page.tsx` — exibe workspace + quem convidou, botão de aceite real
 
 **Papéis e Permissões**
-- [ ] Hook `useWorkspaceRole` — retorna papel do usuário no workspace atual
-- [ ] Proteção de ações Admin-only (remover membro, editar workspace, gerenciar billing)
-- [ ] Membro não pode editar configurações do workspace
-- [ ] Botão remover membro funcional com confirmação
+- [x] `lib/roles.ts` — `getMemberRole`, `isAdmin` (já existia)
+- [x] `removeMember` — admin remove membro ativo com revalidação
+- [x] Limite Free de 2 membros aplicado em `inviteMember` e `acceptInvite`
+- [x] Página de membros: bloqueia convite se atLimit (plano Free + 2 membros)
 
-**Commit final:** `feat: multi-workspace, member invites via email, role-based access`
+**Settings com dados reais**
+- [x] `app/(app)/settings/members/page.tsx` — Server Component: membros ativos + convites pendentes
+- [x] `app/(app)/settings/workspace/page.tsx` — Server Component: dados reais do workspace
+
+**Commit final:** `feat: collaboration — workspace_invites, Resend email invites, RBAC, member limits`
 
 ---
 

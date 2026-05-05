@@ -1,150 +1,88 @@
-"use client"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
+import { getCurrentWorkspaceId } from "@/lib/workspace"
+import { MembersClient } from "@/components/settings/MembersClient"
 
-import { useState } from "react"
-import { UserMinus, Send } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { MOCK_MEMBERS } from "@/lib/mock-data"
-import type { Member } from "@/types"
-
-const inputStyle = {
-  background: "rgba(26,26,30,0.8)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  color: "#E8E8E8",
-  fontFamily: "var(--font-dm-sans, sans-serif)",
+function initials(name: string, email: string): string {
+  const parts = name.trim().split(" ").filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  if (parts.length === 1 && parts[0].length >= 2) return parts[0].slice(0, 2).toUpperCase()
+  return email.slice(0, 2).toUpperCase()
 }
 
-const AVATAR_COLORS = ["#7C3AED", "#4F46E5", "#0284C7", "#059669", "#D97706"]
-function avatarColor(initials: string) {
-  let h = 0
-  for (const c of initials) h += c.charCodeAt(0)
-  return AVATAR_COLORS[h % AVATAR_COLORS.length]
-}
+export default async function MembersPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
 
-export default function MembersPage() {
-  const [members, setMembers] = useState(MOCK_MEMBERS)
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteSent, setInviteSent] = useState(false)
+  const workspaceId = await getCurrentWorkspaceId()
+  const service = createServiceClient()
 
-  function handleRemove(id: string) {
-    setMembers((prev) => prev.filter((m) => m.id !== id))
-  }
+  // Load active members + workspace plan in parallel
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [membersResult, wsResult, invitesResult] = await Promise.all([
+    (service as any)
+      .from("workspace_members")
+      .select("id, user_id, invited_email, role, status")
+      .eq("workspace_id", workspaceId)
+      .eq("status", "active") as Promise<{
+        data: Array<{ id: string; user_id: string | null; invited_email: string | null; role: string; status: string }> | null
+      }>,
+    (service as any)
+      .from("workspaces")
+      .select("plan")
+      .eq("id", workspaceId)
+      .single() as Promise<{ data: { plan: string } | null }>,
+    (service as any)
+      .from("workspace_invites")
+      .select("id, email, role")
+      .eq("workspace_id", workspaceId)
+      .is("accepted_at", null)
+      .gt("expires_at", new Date().toISOString()) as Promise<{
+        data: Array<{ id: string; email: string; role: string }> | null
+      }>,
+  ])
 
-  function handleInvite() {
-    if (!inviteEmail.trim()) return
-    setInviteSent(true)
-    setInviteEmail("")
-    setTimeout(() => setInviteSent(false), 2500)
-  }
+  const members = membersResult.data ?? []
+  const plan = wsResult.data?.plan ?? "free"
+  const pendingInvites = invitesResult.data ?? []
 
-  return (
-    <div className="flex flex-col gap-4">
-      {/* member list */}
-      <SettingsSection title="Membros" description="Gerencie quem tem acesso a este workspace">
-        <div className="flex flex-col divide-y" style={{ "--tw-divide-opacity": 1 } as React.CSSProperties}>
-          {members.map((m) => (
-            <div key={m.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold text-white"
-                style={{ background: avatarColor(m.initials), fontFamily: "var(--font-syne, sans-serif)" }}
-              >
-                {m.initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold" style={{ color: "#E8E8E8", fontFamily: "var(--font-dm-sans, sans-serif)" }}>
-                  {m.name}
-                </p>
-                <p className="text-[11px]" style={{ color: "#555559" }}>
-                  {m.invited_email ?? `${m.name.toLowerCase().replace(" ", ".")}@acmecorp.com`}
-                </p>
-              </div>
-              <span
-                className="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                style={{
-                  background: m.role === "admin" ? "rgba(202,255,51,0.1)" : "rgba(255,255,255,0.05)",
-                  color: m.role === "admin" ? "#CAFF33" : "#8A8A8F",
-                  fontFamily: "var(--font-ibm-mono, monospace)",
-                  border: m.role === "admin" ? "1px solid rgba(202,255,51,0.2)" : "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                {m.role === "admin" ? "Admin" : "Membro"}
-              </span>
-              {m.role !== "admin" && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(m.id)}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
-                  style={{ color: "#555559", background: "transparent" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.color = "#EF4444"
-                    ;(e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)"
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.color = "#555559"
-                    ;(e.currentTarget as HTMLButtonElement).style.background = "transparent"
-                  }}
-                >
-                  <UserMinus className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </SettingsSection>
-
-      {/* invite */}
-      <SettingsSection title="Convidar Membro" description="Envie um convite por e-mail para adicionar alguém ao workspace">
-        <div className="flex flex-col gap-3 max-w-sm">
-          <div className="grid gap-1.5">
-            <Label style={{ color: "#555559", fontFamily: "var(--font-ibm-mono, monospace)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              E-mail
-            </Label>
-            <Input
-              type="email"
-              placeholder="nome@empresa.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-              className="h-9 text-sm border-0 focus-visible:ring-1 focus-visible:ring-[rgba(202,255,51,0.4)]"
-              style={inputStyle}
-            />
-          </div>
-          <Button
-            size="sm"
-            onClick={handleInvite}
-            className="gap-2 self-start"
-            style={{
-              background: inviteSent ? "#22C55E" : "#CAFF33",
-              color: "#0C0C0E",
-              border: "none",
-              fontFamily: "var(--font-syne, sans-serif)",
-              fontWeight: 700,
-              transition: "background 0.2s",
-            }}
-          >
-            <Send className="h-3.5 w-3.5" />
-            {inviteSent ? "Convite enviado!" : "Enviar convite"}
-          </Button>
-        </div>
-      </SettingsSection>
-    </div>
+  // Resolve user names via admin API
+  const { data: listData } = await service.auth.admin.listUsers({ perPage: 1000 })
+  const userMap = new Map(
+    (listData?.users ?? []).map((u) => [
+      u.id,
+      (u.user_metadata?.full_name as string | undefined) ?? u.email ?? "",
+    ])
   )
-}
 
-function SettingsSection({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+  type Row =
+    | { kind: "member"; id: string; name: string; email: string; initials: string; role: string }
+    | { kind: "invite"; id: string; email: string; initials: string; role: string }
+
+  const memberRows: Row[] = members.map((m) => {
+    const name = m.user_id ? (userMap.get(m.user_id) ?? m.invited_email ?? "Membro") : (m.invited_email ?? "Membro")
+    const email = m.user_id ? ((listData?.users ?? []).find((u) => u.id === m.user_id)?.email ?? m.invited_email ?? "") : (m.invited_email ?? "")
+    return { kind: "member", id: m.id, name, email, initials: initials(name, email), role: m.role }
+  })
+
+  const inviteRows: Row[] = pendingInvites.map((inv) => ({
+    kind: "invite",
+    id: inv.id,
+    email: inv.email,
+    initials: inv.email.slice(0, 2).toUpperCase(),
+    role: inv.role,
+  }))
+
+  const rows: Row[] = [...memberRows, ...inviteRows]
+
   return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.06)" }}
-    >
-      <div className="px-6 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-        <h2 className="text-sm font-bold" style={{ color: "#E8E8E8", fontFamily: "var(--font-syne, sans-serif)" }}>
-          {title}
-        </h2>
-        <p className="text-[12px] mt-0.5" style={{ color: "#555559" }}>{description}</p>
-      </div>
-      <div className="px-6 py-5">{children}</div>
-    </div>
+    <MembersClient
+      rows={rows}
+      workspaceId={workspaceId}
+      plan={plan}
+      activeMemberCount={members.length}
+    />
   )
 }
